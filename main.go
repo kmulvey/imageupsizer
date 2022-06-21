@@ -29,6 +29,7 @@ type imageData struct {
 	Extension string
 	Size      image.Config
 	Quality   int
+	FileSize  int
 }
 
 var (
@@ -36,8 +37,8 @@ var (
 	errCaptcha           = errors.New("response was captcha page")
 )
 
-func uploadImage(filename string) (contents []byte, err error) {
-	file, err := os.Open(filename)
+func uploadImage(filename string) ([]byte, error) {
+	var file, err = os.Open(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -48,22 +49,26 @@ func uploadImage(filename string) (contents []byte, err error) {
 		return nil, err
 	}
 
-	fileStat, err := file.Stat()
+	var buf = new(bytes.Buffer)
+	var writer = multipart.NewWriter(buf)
+	part, err := writer.CreateFormFile("encoded_image", filename)
+	if err != nil {
+		return nil, err
+	}
+	_, err = part.Write(fileContents)
 	if err != nil {
 		return nil, err
 	}
 
-	buf := new(bytes.Buffer)
-	writer := multipart.NewWriter(buf)
-	part, err := writer.CreateFormFile("encoded_image", fileStat.Name())
-	if err != nil {
+	if err := writer.WriteField("image_url", ""); err != nil {
 		return nil, err
 	}
-	part.Write(fileContents)
-
-	writer.WriteField("image_url", "")
-	writer.WriteField("filename", "")
-	writer.WriteField("hl", "en")
+	if err := writer.WriteField("filename", ""); err != nil {
+		return nil, err
+	}
+	if err := writer.WriteField("hl", "en"); err != nil {
+		return nil, err
+	}
 
 	if err := writer.Close(); err != nil {
 		return nil, err
@@ -85,7 +90,7 @@ func uploadImage(filename string) (contents []byte, err error) {
 	}
 	defer resp.Body.Close()
 
-	contents, err = ioutil.ReadAll(resp.Body)
+	contents, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
