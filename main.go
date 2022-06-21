@@ -31,8 +31,6 @@ type imageData struct {
 	Quality   int
 }
 
-var client = &http.Client{}
-
 var (
 	errNoLargerAvailable = errors.New("there is no large image")
 	errCaptcha           = errors.New("response was captcha page")
@@ -80,6 +78,7 @@ func uploadImage(filename string) (contents []byte, err error) {
 	req.Header.Add("referer", "https://images.google.com/")
 	req.Header.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36")
 
+	var client = &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
@@ -152,6 +151,7 @@ func getImageList(contents []byte) (data []*imageData, err error) {
 	req.Header.Add("referer", "https://images.google.com/")
 	req.Header.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36")
 
+	var client = &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
