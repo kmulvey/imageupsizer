@@ -214,14 +214,14 @@ func getImageList(contents []byte) ([]*imageData, error) {
 	return data, nil
 }
 
-func getImageSizeFromFile(filename string) (data image.Config, err error) {
-	file, err := os.Open(filename)
+func getImageSizeFromFile(filename string) (image.Config, error) {
+	var file, err = os.Open(filename)
 	if err != nil {
 		return image.Config{}, err
 	}
 	defer file.Close()
 
-	data, _, err = image.DecodeConfig(file)
+	data, _, err := image.DecodeConfig(file)
 	if err != nil {
 		return image.Config{}, err
 	}
@@ -230,10 +230,10 @@ func getImageSizeFromFile(filename string) (data image.Config, err error) {
 }
 
 func main() {
-	path := flag.String("path", "", "A image file or directory path")
-	output := flag.String("output", "", "Result output directory path")
-	copyInput := flag.Bool("copy", true, "Copy the original image if not higher resolution available")
-	logLevel := flag.String("log-level", "error", "Set the level of log output: (info, warn, error)")
+	var path = flag.String("path", "", "A image file or directory path")
+	var output = flag.String("output", "", "Result output directory path")
+	var copyInput = flag.Bool("copy", true, "Copy the original image if not higher resolution available")
+	var logLevel = flag.String("log-level", "error", "Set the level of log output: (info, warn, error)")
 	flag.Parse()
 
 	switch strings.ToLower(*logLevel) {
@@ -249,7 +249,6 @@ func main() {
 
 	if len(*path) == 0 || len(*output) == 0 {
 		flag.PrintDefaults()
-
 		return
 	}
 
