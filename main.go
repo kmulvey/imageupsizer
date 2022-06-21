@@ -34,8 +34,8 @@ type imageData struct {
 var client = &http.Client{}
 
 var (
-    errNoLargerAvailable = errors.New("there is no large image")
-    errCaptcha           = errors.New("response was captcha page")
+	errNoLargerAvailable = errors.New("there is no large image")
+	errCaptcha           = errors.New("response was captcha page")
 )
 
 func uploadImage(filename string) (contents []byte, err error) {
@@ -65,7 +65,7 @@ func uploadImage(filename string) (contents []byte, err error) {
 
 	writer.WriteField("image_url", "")
 	writer.WriteField("filename", "")
-	writer.WriteField("hl", "ko")
+	writer.WriteField("hl", "en")
 
 	if err := writer.Close(); err != nil {
 		return nil, err
@@ -249,7 +249,7 @@ func main() {
 
 		if !info.IsDir() {
 			switch filepath.Ext(path) {
-			case ".jpg", ".png", ".jpeg":
+			case ".jpg", ".png", ".jpeg", "webp":
 				log.Infof("[%s] Getting original image info...", path)
 				imageSize, err := getImageSizeFromFile(path)
 				if err != nil {
@@ -296,22 +296,25 @@ func main() {
 						break
 					}
 
-					log.Infof("[%s] Image URL: %s", path, i.URL)
-					imageInfo, err := getImage(i.URL)
-					if err != nil {
-						log.Warn("This URL is not available, so try again with another URL")
-						continue
+					if i.Quality > imageSize.Width*imageSize.Height {
+						log.Infof("[%s] Image URL: %s", path, i.URL)
+						imageInfo, err := getImage(i.URL)
+						if err != nil {
+							log.Warn("This URL is not available, so try again with another URL")
+							continue
+						}
+
+						newFilename := strings.ReplaceAll(info.Name(), filepath.Ext(path), "."+imageInfo.Extension)
+
+						log.Infof("[%s] Saving high resolution image...", path)
+						if err := ioutil.WriteFile(fmt.Sprintf("%s/%s", *output, newFilename), imageInfo.Body, os.ModePerm); err != nil {
+							log.Error(err)
+						}
+
+						log.Infof("[%s] Saved: %s (%dx%d -> %dx%d)", path, newFilename, imageSize.Width, imageSize.Height, imageInfo.Size.Width, imageInfo.Size.Height)
+
+						break
 					}
-
-					newFilename := strings.ReplaceAll(info.Name(), filepath.Ext(path), "."+imageInfo.Extension)
-
-					log.Infof("[%s] Saving high resolution image...", path)
-					if err := ioutil.WriteFile(fmt.Sprintf("%s/%s", *output, newFilename), imageInfo.Body, os.ModePerm); err != nil {
-						log.Error(err)
-					}
-					log.Infof("[%s] Saved: %s (%dx%d -> %dx%d)", path, newFilename, imageSize.Width, imageSize.Height, imageInfo.Size.Width, imageInfo.Size.Height)
-
-					break
 				}
 			default:
 				log.Infof("[%s] Skip !", path)
