@@ -98,10 +98,10 @@ func uploadImage(filename string) ([]byte, error) {
 	return contents, nil
 }
 
-func getImage(url string) (data *imageData, err error) {
-	data = &imageData{}
+func getImage(url string) (*imageData, error) {
+	var data = &imageData{}
 
-	resp, err := http.Get(url)
+	var resp, err = http.Get(url)
 	if err != nil {
 		return nil, err
 	}
@@ -122,6 +122,7 @@ func getImage(url string) (data *imageData, err error) {
 	data.Extension = ext
 	data.Size = imageDecode
 	data.Quality = data.Size.Height * data.Size.Width
+	data.FileSize = len(body)
 
 	return data, nil
 }
