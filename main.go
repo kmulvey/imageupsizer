@@ -25,11 +25,11 @@ import (
 
 type imageData struct {
 	URL       string
-	Body      []byte
+	Bytes     []byte
 	Extension string
-	Size      image.Config
-	Quality   int
-	FileSize  int
+	image.Config
+	Area     int
+	FileSize int64
 }
 
 var (
@@ -118,11 +118,11 @@ func getImage(url string) (*imageData, error) {
 	}
 
 	data.URL = url
-	data.Body = body
+	data.Bytes = body
 	data.Extension = ext
-	data.Size = imageDecode
-	data.Quality = data.Size.Height * data.Size.Width
-	data.FileSize = len(body)
+	data.Config = imageDecode
+	data.Area = data.Config.Height * data.Config.Width
+	data.FileSize = int64(len(body))
 
 	return data, nil
 }
@@ -202,28 +202,45 @@ func getImageList(contents []byte) ([]*imageData, error) {
 		}
 
 		data = append(data, &imageData{
-			URL:     imgURL.String(),
-			Quality: imgHeight * imgWidth,
+			URL:  imgURL.String(),
+			Area: imgHeight * imgWidth,
 		})
 	}
 
 	sort.Slice(data, func(i, j int) bool {
-		return data[i].Quality > data[j].Quality
+		return data[i].Area > data[j].Area
 	})
 
 	return data, nil
 }
 
-func getImageSizeFromFile(filename string) (image.Config, error) {
+func getImageConfigFromFile(filename string) (*imageData, error) {
+	var data = new(imageData)
+
 	var file, err = os.Open(filename)
 	if err != nil {
-		return image.Config{}, err
+		return nil, err
 	}
 	defer file.Close()
 
-	data, _, err := image.DecodeConfig(file)
+	config, ext, err := image.DecodeConfig(file)
 	if err != nil {
-		return image.Config{}, err
+		return nil, err
+	}
+
+	imageBody, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+
+	data.Config = config
+	data.Bytes = imageBody
+	data.Extension = ext
+	data.Area = config.Width * config.Height
+	if stat, err := file.Stat(); err != nil {
+		return nil, err
+	} else {
+		data.FileSize = stat.Size()
 	}
 
 	return data, nil
@@ -266,7 +283,7 @@ func main() {
 			switch filepath.Ext(path) {
 			case ".jpg", ".png", ".jpeg", "webp":
 				log.Infof("[%s] Getting original image info...", path)
-				imageSize, err := getImageSizeFromFile(path)
+				originalImage, err := getImageConfigFromFile(path)
 				if err != nil {
 					return err
 				}
@@ -283,17 +300,8 @@ func main() {
 				if err != nil {
 					if errors.Is(errNoLargerAvailable, err) {
 						justcopy = true
-						file, _ := os.Open(path)
-
-						imageBody, _ := ioutil.ReadAll(file)
-						file.Close()
-
-						data = append(data, &imageData{
-							URL:       path,
-							Body:      imageBody,
-							Extension: filepath.Ext(path),
-							Size:      imageSize,
-						})
+						originalImage.URL = path
+						data = append(data, originalImage)
 					} else if errors.Is(errCaptcha, err) {
 						log.Fatal("received a captcha page, stopping")
 					} else {
@@ -304,14 +312,14 @@ func main() {
 				for _, i := range data {
 					if justcopy && *copyInput {
 						log.Warnf("[%s] High resolution image does not found, so just copyed: %s", path, i.URL)
-						if err := ioutil.WriteFile(fmt.Sprintf("%s/%s", *output, info.Name()), i.Body, os.ModePerm); err != nil {
+						if err := ioutil.WriteFile(fmt.Sprintf("%s/%s", *output, info.Name()), i.Bytes, os.ModePerm); err != nil {
 							log.Error(err)
 						}
 
 						break
 					}
 
-					if i.Quality > imageSize.Width*imageSize.Height {
+					if i.Area > originalImage.Width*originalImage.Height {
 						log.Infof("[%s] Image URL: %s", path, i.URL)
 						imageInfo, err := getImage(i.URL)
 						if err != nil {
@@ -322,11 +330,11 @@ func main() {
 						newFilename := strings.ReplaceAll(info.Name(), filepath.Ext(path), "."+imageInfo.Extension)
 
 						log.Infof("[%s] Saving high resolution image...", path)
-						if err := ioutil.WriteFile(fmt.Sprintf("%s/%s", *output, newFilename), imageInfo.Body, os.ModePerm); err != nil {
+						if err := ioutil.WriteFile(fmt.Sprintf("%s/%s", *output, newFilename), imageInfo.Bytes, os.ModePerm); err != nil {
 							log.Error(err)
 						}
 
-						log.Infof("[%s] Saved: %s (%dx%d -> %dx%d)", path, newFilename, imageSize.Width, imageSize.Height, imageInfo.Size.Width, imageInfo.Size.Height)
+						log.Infof("[%s] Saved: %s (%dx%d -> %dx%d)", path, newFilename, originalImage.Width, originalImage.Height, imageInfo.Config.Width, imageInfo.Config.Height)
 
 						break
 					}
