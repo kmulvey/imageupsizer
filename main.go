@@ -127,9 +127,12 @@ func getImage(url string) (*imageData, error) {
 	return data, nil
 }
 
-func getImageList(contents []byte) (data []*imageData, err error) {
+func getImageList(contents []byte) ([]*imageData, error) {
 	var largeImgURL string
-	r, _ := regexp.Compile(`(/search\?.*?simg:.*?)">`)
+	var r, err = regexp.Compile(`(/search\?.*?simg:.*?)">`)
+	if err != nil {
+		return nil, err
+	}
 
 	for _, i := range r.FindAllStringSubmatch(string(contents), -1) {
 		if len(i) < 2 {
@@ -138,7 +141,6 @@ func getImageList(contents []byte) (data []*imageData, err error) {
 
 		if strings.Contains(i[1], ",isz:l") {
 			largeImgURL = "https://google.com" + html.UnescapeString(i[1])
-
 			break
 		}
 	}
@@ -165,8 +167,15 @@ func getImageList(contents []byte) (data []*imageData, err error) {
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
-	imgInfo, _ := regexp.Compile(`\["(https://.*?.)",(\d+),(\d+)\]`)
+	if err != nil {
+		return nil, err
+	}
+	imgInfo, err := regexp.Compile(`\["(https://.*?.)",(\d+),(\d+)\]`)
+	if err != nil {
+		return nil, err
+	}
 
+	var data []*imageData
 	for _, i := range imgInfo.FindAllStringSubmatch(string(body), -1) {
 		if len(i) < 4 {
 			continue
@@ -186,6 +195,7 @@ func getImageList(contents []byte) (data []*imageData, err error) {
 		if err != nil {
 			continue
 		}
+
 		imgWidth, err := strconv.Atoi(i[3])
 		if err != nil {
 			continue
