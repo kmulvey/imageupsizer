@@ -97,9 +97,16 @@ func main() {
 					if err != nil {
 						return fmt.Errorf("remove downloaded file, %s, %w", largerImage.LocalPath, err)
 					}
+				} else {
+					// we dont want this file
+					err = os.Remove(filepath.Base(largerImage.LocalPath))
+					if err != nil {
+						return fmt.Errorf("remove downloaded file, %s, %w", largerImage.LocalPath, err)
+					}
+					return nil
 				}
-				var areaIncrease = (float64(largerImage.Area) - float64(originalImage.Area)) / float64(originalImage.Area)
-				var fileIncrease = (float64(largerImage.FileSize) - float64(originalImage.FileSize)) / float64(originalImage.FileSize)
+				var areaIncrease = ((float64(largerImage.Area) - float64(originalImage.Area)) / float64(originalImage.Area)) * 100
+				var fileIncrease = ((float64(largerImage.FileSize) - float64(originalImage.FileSize)) / float64(originalImage.FileSize)) * 100
 
 				if fileIncrease > areaIncrease {
 					warnings = append(warnings, log.Fields{
