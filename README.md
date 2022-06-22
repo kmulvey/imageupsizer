@@ -1,5 +1,7 @@
-# Google Image Upsizer
-[![imageupsizer](https://github.com/kmulvey/imageupsizer/actions/workflows/release_build.yml/badge.svg)](https://github.com/kmulvey/imageupsizer/actions/workflows/release_build.yml)
+# Google Image Upsizer 
+
+[![imageupsizer](https://github.com/kmulvey/imageupsizer/actions/workflows/release_build.yml/badge.svg)](https://github.com/kmulvey/imageupsizer/actions/workflows/release_build.yml) [![Go Report Card](https://goreportcard.com/badge/github.com/kmulvey/imageupsizer)](https://goreportcard.com/report/github.com/kmulvey/imageupsizer) [![Go Reference](https://pkg.go.dev/badge/github.com/kmulvey/imageupsizer.svg)](https://pkg.go.dev/github.com/kmulvey/imageupsizer)
+
 Extract the best images from Google Image Search. Divergent fork of [yms2772/google_image_upsizer]([yms2772/google_image_upsizer](https://github.com/yms2772/google_image_upsizer)).
 
 ## How to use
