@@ -6,7 +6,7 @@ before:
     - go mod tidy
 builds:
   - id: google_image_upsizer
-    main: .
+    main: cmd/main.go
     env:
       - CGO_ENABLED=0
     goos:
