@@ -1,4 +1,4 @@
-package main
+package imageupsizer
 
 import (
 	"bytes"
@@ -85,8 +85,8 @@ func uploadImage(filename string) ([]byte, error) {
 	return contents, nil
 }
 
-func getImage(url string) (*imageData, error) {
-	var data = &imageData{}
+func getImage(url string) (*ImageData, error) {
+	var data = &ImageData{}
 
 	var resp, err = http.Get(url)
 	if err != nil {
@@ -114,7 +114,7 @@ func getImage(url string) (*imageData, error) {
 	return data, nil
 }
 
-func getImageList(contents []byte) (*imageData, error) {
+func getImageList(contents []byte) (*ImageData, error) {
 	var largeImgURL string
 	var r, err = regexp.Compile(`(/search\?.*?simg:.*?)">`)
 	if err != nil {
@@ -162,7 +162,7 @@ func getImageList(contents []byte) (*imageData, error) {
 		return nil, err
 	}
 
-	var data []*imageData
+	var data []*ImageData
 	for _, i := range imgInfo.FindAllStringSubmatch(string(body), -1) {
 		if len(i) < 4 {
 			continue
@@ -188,7 +188,7 @@ func getImageList(contents []byte) (*imageData, error) {
 			continue
 		}
 
-		data = append(data, &imageData{
+		data = append(data, &ImageData{
 			URL:  imgURL.String(),
 			Area: imgHeight * imgWidth,
 		})
@@ -205,8 +205,8 @@ func getImageList(contents []byte) (*imageData, error) {
 	return data[0], nil
 }
 
-func getImageConfigFromFile(filename string) (*imageData, error) {
-	var data = new(imageData)
+func getImageConfigFromFile(filename string) (*ImageData, error) {
+	var data = new(ImageData)
 
 	var file, err = os.Open(filename)
 	if err != nil {

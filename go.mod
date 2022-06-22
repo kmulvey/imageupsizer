@@ -1,4 +1,4 @@
-module github.com/yms2772/google_image_upsizer
+module github.com/kmulvey/imageupsizer
 
 go 1.18
 

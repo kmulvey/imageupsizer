@@ -1,14 +1,14 @@
-package main
+package imageupsizer
 
 import (
 	"io/ioutil"
 	"os"
 	"path"
 
-	"github.com/apex/log"
+	log "github.com/sirupsen/logrus"
 )
 
-func FindLargerImageFromFile(filename string) (*imageData, error) {
+func FindLargerImageFromFile(filename string) (*ImageData, error) {
 	originalImage, err := getImageConfigFromFile(filename)
 	if err != nil {
 		return nil, err
@@ -30,7 +30,7 @@ func FindLargerImageFromFile(filename string) (*imageData, error) {
 	return nil, errNoLargerAvailable
 }
 
-func GetLargerImageFromFile(filename string) (*imageData, error) {
+func GetLargerImageFromFile(filename string) (*ImageData, error) {
 	var largerImage, err = FindLargerImageFromFile(filename)
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func GetLargerImageFromFile(filename string) (*imageData, error) {
 	return imageInfo, ioutil.WriteFile(path.Base(imageInfo.URL), imageInfo.Bytes, 0755)
 }
 
-func FindLargerImageFromBytes(image []byte, outputFile string) (*imageData, error) {
+func FindLargerImageFromBytes(image []byte, outputFile string) (*ImageData, error) {
 	var tmpfile = "FindLargerImageFromBytesTmpfile.image"
 	defer os.Remove(tmpfile)
 
@@ -65,7 +65,7 @@ func FindLargerImageFromBytes(image []byte, outputFile string) (*imageData, erro
 	return largerImage, os.Remove(tmpfile)
 }
 
-func GetLargerImageFromBytes(image []byte) (*imageData, error) {
+func GetLargerImageFromBytes(image []byte) (*ImageData, error) {
 	var tmpfile = "GetLargerImageFromBytesTmpfile.image"
 	defer os.Remove(tmpfile)
 
