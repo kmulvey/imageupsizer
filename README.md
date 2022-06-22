@@ -12,7 +12,7 @@ imageupsizer -path="original/test.jpg" -output="result/"
 ## Required options
 |Name|Type|Description|
 |------|---|---|
-|`-path`|`string`|Path to the image file or directory you want to upscale|
+|`-input`|`string`|Path to the image file or directory you want to upscale|
 |`-output`|`string`|Directory path to save results|
 
 # Result
