@@ -7,8 +7,10 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
+	"syscall"
 
 	"github.com/kmulvey/imageconvert/pkg/imageconvert"
 	"github.com/kmulvey/imageupsizer"
@@ -46,6 +48,9 @@ func main() {
 		return
 	}
 
+	var signals = make(chan os.Signal, 1)
+	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
+
 	log.WithFields(log.Fields{
 		"inputDir":  inputPath,
 		"outputDir": outputPath,
@@ -53,10 +58,16 @@ func main() {
 	}).Info("Started")
 
 	var warnings []logrus.Fields
+	var errorShutdown = errors.New("done")
 	if err := filepath.Walk(inputPath, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
 			switch filepath.Ext(path) {
 			case ".jpg", ".png", ".jpeg", "webp":
+				if len(signals) > 0 {
+					log.Info("shutting down")
+					return errorShutdown
+				}
+
 				log.Tracef("[%s] Getting original image info...", path)
 				var originalImage, err = imageupsizer.GetImageConfigFromFile(path)
 				if err != nil {
@@ -81,6 +92,11 @@ func main() {
 					if err != nil {
 						return fmt.Errorf("replace old file, %s, %w", path, err)
 					}
+
+					err = os.Remove(filepath.Base(largerImage.LocalPath))
+					if err != nil {
+						return fmt.Errorf("remove downloaded file, %s, %w", largerImage.LocalPath, err)
+					}
 				}
 				var areaIncrease = (float64(largerImage.Area) - float64(originalImage.Area)) / float64(originalImage.Area)
 				var fileIncrease = (float64(largerImage.FileSize) - float64(originalImage.FileSize)) / float64(originalImage.FileSize)
@@ -101,6 +117,7 @@ func main() {
 					"area increace":      fmt.Sprintf("%.2f%%", areaIncrease),
 					"file size increace": fmt.Sprintf("%.2f%%", fileIncrease),
 				}).Info("upsized image")
+
 			default:
 				log.Infof("[%s] Skip !", path)
 			}
@@ -108,7 +125,9 @@ func main() {
 
 		return nil
 	}); err != nil {
-		log.Errorf("error in walk loop: %v", err)
+		if !errors.Is(err, errorShutdown) {
+			log.Errorf("error in walk loop: %v", err)
+		}
 	}
 
 	for _, f := range warnings {
