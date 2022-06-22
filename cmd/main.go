@@ -63,7 +63,7 @@ func main() {
 						log.Infof("[%s] Larger image not available", path)
 						return nil // we just keep going
 					}
-					log.Errorf("GetLargerImageFromFile, %s, %w", path, err)
+					log.Errorf("GetLargerImageFromFile, %s, %v", path, err)
 					return nil
 				}
 
