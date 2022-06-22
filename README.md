@@ -1,4 +1,5 @@
 # Google Image Upsizer
+[![imageupsizer](https://github.com/kmulvey/imageupsizer/actions/workflows/release_build.yml/badge.svg)](https://github.com/kmulvey/imageupsizer/actions/workflows/release_build.yml)
 Extract the best images from Google Image Search. Divergent fork of [yms2772/google_image_upsizer]([yms2772/google_image_upsizer](https://github.com/yms2772/google_image_upsizer)).
 
 ## How to use
