@@ -1,15 +1,15 @@
 # Google Image Upsizer
-Extract the best images from Google Image Search
+Extract the best images from Google Image Search. Divergent fork of [yms2772/google_image_upsizer]([yms2772/google_image_upsizer](https://github.com/yms2772/google_image_upsizer)).
 
-# How to use
+## How to use
 ```go
-go install github.com/yms2772/google_image_upsizer
+go install github.com/kmulvey/imageupsizer
 ```
 ```go
-google_image_upsizer -path="original/test.jpg" -output="result/"
+imageupsizer -path="original/test.jpg" -output="result/"
 ```
 
-# Required options
+## Required options
 |Name|Type|Description|
 |------|---|---|
 |`-path`|`string`|Path to the image file or directory you want to upscale|
