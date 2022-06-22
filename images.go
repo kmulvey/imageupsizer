@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"html"
 	"image"
 	"io/ioutil"
@@ -102,6 +103,9 @@ func getImage(url string) (*ImageData, error) {
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
+	req.Header.Add("Accept-Encoding", "gzip, deflate, br")
+	req.Header.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:101.0) Gecko/20100101 Firefox/101.0")
 
 	resp, err := httpCient.Do(req)
 	if err != nil {
@@ -113,6 +117,11 @@ func getImage(url string) (*ImageData, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return nil, fmt.Errorf("non 2xx resp code: %d", resp.StatusCode)
+	}
+
 	if strings.HasPrefix(resp.Header.Get("content-type"), "text/html") {
 		return nil, errors.New("resp was html: " + url)
 	}
