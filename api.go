@@ -4,12 +4,13 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 
 	log "github.com/sirupsen/logrus"
 )
 
 func FindLargerImageFromFile(filename string) (*ImageData, error) {
-	originalImage, err := getImageConfigFromFile(filename)
+	originalImage, err := GetImageConfigFromFile(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +31,7 @@ func FindLargerImageFromFile(filename string) (*ImageData, error) {
 	return nil, errNoLargerAvailable
 }
 
-func GetLargerImageFromFile(filename string) (*ImageData, error) {
+func GetLargerImageFromFile(filename, outputDir string) (*ImageData, error) {
 	var largerImage, err = FindLargerImageFromFile(filename)
 	if err != nil {
 		return nil, err
@@ -41,9 +42,11 @@ func GetLargerImageFromFile(filename string) (*ImageData, error) {
 		return nil, err
 	}
 
-	if err := ioutil.WriteFile(path.Base(imageInfo.URL), imageInfo.Bytes, os.ModePerm); err != nil {
+	var newFile = filepath.Join(outputDir, path.Base(imageInfo.URL))
+	if err := ioutil.WriteFile(newFile, imageInfo.Bytes, os.ModePerm); err != nil {
 		log.Error(err)
 	}
+	imageInfo.LocalPath = newFile
 
 	return imageInfo, ioutil.WriteFile(path.Base(imageInfo.URL), imageInfo.Bytes, 0755)
 }
@@ -65,7 +68,7 @@ func FindLargerImageFromBytes(image []byte, outputFile string) (*ImageData, erro
 	return largerImage, os.Remove(tmpfile)
 }
 
-func GetLargerImageFromBytes(image []byte) (*ImageData, error) {
+func GetLargerImageFromBytes(image []byte, outputDir string) (*ImageData, error) {
 	var tmpfile = "GetLargerImageFromBytesTmpfile.image"
 	defer os.Remove(tmpfile)
 
@@ -73,5 +76,5 @@ func GetLargerImageFromBytes(image []byte) (*ImageData, error) {
 	if err != nil {
 		return nil, err
 	}
-	return GetLargerImageFromFile(tmpfile)
+	return GetLargerImageFromFile(tmpfile, outputDir)
 }

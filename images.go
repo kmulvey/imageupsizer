@@ -20,8 +20,9 @@ type ImageData struct {
 	Bytes     []byte
 	Extension string
 	image.Config
-	Area     int
-	FileSize int64
+	Area      int
+	FileSize  int64
+	LocalPath string
 }
 
 func uploadImage(filename string) ([]byte, error) {
@@ -205,8 +206,9 @@ func getImageList(contents []byte) (*ImageData, error) {
 	return data[0], nil
 }
 
-func getImageConfigFromFile(filename string) (*ImageData, error) {
+func GetImageConfigFromFile(filename string) (*ImageData, error) {
 	var data = new(ImageData)
+	data.LocalPath = filename
 
 	var file, err = os.Open(filename)
 	if err != nil {
