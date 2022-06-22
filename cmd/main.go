@@ -42,9 +42,15 @@ func main() {
 	}
 
 	if err := os.MkdirAll(outputPath, os.ModePerm); err != nil {
-		log.Error("output path must be directory")
+		log.Error("output path must be directory: ", outputPath)
 		return
 	}
+
+	log.WithFields(log.Fields{
+		"inputDir":  inputPath,
+		"outputDir": outputPath,
+		"log-level": logLevel,
+	}).Info("Started")
 
 	var warnings []logrus.Fields
 	if err := filepath.Walk(inputPath, func(path string, info os.FileInfo, err error) error {
