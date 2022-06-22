@@ -3,6 +3,7 @@ package imageupsizer
 import (
 	"bytes"
 	"crypto/tls"
+	"errors"
 	"html"
 	"image"
 	"io/ioutil"
@@ -111,6 +112,9 @@ func getImage(url string) (*ImageData, error) {
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
+	}
+	if strings.HasPrefix(resp.Header.Get("content-type"), "text/html") {
+		return nil, errors.New("resp was html: " + url)
 	}
 
 	imageDecode, ext, err := image.DecodeConfig(bytes.NewReader(body))
