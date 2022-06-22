@@ -57,7 +57,7 @@ func main() {
 		if !info.IsDir() {
 			switch filepath.Ext(path) {
 			case ".jpg", ".png", ".jpeg", "webp":
-				log.Infof("[%s] Getting original image info...", path)
+				log.Tracef("[%s] Getting original image info...", path)
 				var originalImage, err = imageupsizer.GetImageConfigFromFile(path)
 				if err != nil {
 					return fmt.Errorf("GetImageConfigFromFile, %s, %w", path, err)
