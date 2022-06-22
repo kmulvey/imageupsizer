@@ -28,7 +28,7 @@ func FindLargerImageFromFile(filename string) (*ImageData, error) {
 	if largerImage.Area > originalImage.Width*originalImage.Height {
 		return largerImage, nil
 	}
-	return nil, errNoLargerAvailable
+	return nil, ErrNoLargerAvailable
 }
 
 func GetLargerImageFromFile(filename, outputDir string) (*ImageData, error) {

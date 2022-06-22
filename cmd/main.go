@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	_ "image/jpeg"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/kmulvey/imageconvert/pkg/imageconvert"
 	"github.com/kmulvey/imageupsizer"
+	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,8 +20,8 @@ func main() {
 	var inputPath string
 	var outputPath string
 	var logLevel string
-	flag.StringVar(&inputPath, "path", "", "A image file or directory path")
-	flag.StringVar(&outputPath, "output", "", "Result output directory path")
+	flag.StringVar(&inputPath, "input", "", "A image file or directory path")
+	flag.StringVar(&outputPath, "output", "", "A directory to put the larger image in")
 	flag.StringVar(&logLevel, "log-level", "error", "Set the level of log output: (info, warn, error)")
 	flag.Parse()
 
@@ -44,6 +46,7 @@ func main() {
 		return
 	}
 
+	var warnings []logrus.Fields
 	if err := filepath.Walk(inputPath, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
 			switch filepath.Ext(path) {
@@ -56,7 +59,12 @@ func main() {
 
 				largerImage, err := imageupsizer.GetLargerImageFromFile(path, outputPath)
 				if err != nil {
-					return fmt.Errorf("GetLargerImageFromFile, %s, %w", path, err)
+					if errors.Is(err, imageupsizer.ErrNoLargerAvailable) || errors.Is(err, imageupsizer.ErrNoResults) {
+						log.Infof("[%s] Larger image not available", path)
+						return nil // we just keep going
+					}
+					log.Errorf("GetLargerImageFromFile, %s, %w", path, err)
+					return nil
 				}
 
 				if largerImage.Area > originalImage.Width*originalImage.Height {
@@ -68,26 +76,25 @@ func main() {
 						return fmt.Errorf("replace old file, %s, %w", path, err)
 					}
 				}
-				var areaIncrease = (largerImage.Area - originalImage.Area) / originalImage.Area
-				var fileIncrease = (largerImage.FileSize - originalImage.FileSize) / originalImage.FileSize
+				var areaIncrease = (float64(largerImage.Area) - float64(originalImage.Area)) / float64(originalImage.Area)
+				var fileIncrease = (float64(largerImage.FileSize) - float64(originalImage.FileSize)) / float64(originalImage.FileSize)
 
-				if fileIncrease > int64(areaIncrease) {
-					log.WithFields(log.Fields{
+				if fileIncrease > areaIncrease {
+					warnings = append(warnings, log.Fields{
 						"path":               originalImage.LocalPath,
 						"original area":      originalImage.Area,
 						"new area":           largerImage.Area,
-						"area increace":      fmt.Sprintf("%d%%", (largerImage.Area-originalImage.Area)/originalImage.Area),
-						"file size increace": fmt.Sprintf("%d%%", (largerImage.FileSize-originalImage.FileSize)/originalImage.FileSize),
-					}).Warn("upsized image is a lot bigger in file size")
-				} else {
-					log.WithFields(log.Fields{
-						"path":               originalImage.LocalPath,
-						"original area":      originalImage.Area,
-						"new area":           largerImage.Area,
-						"area increace":      fmt.Sprintf("%d%%", (largerImage.Area-originalImage.Area)/originalImage.Area),
-						"file size increace": fmt.Sprintf("%d%%", (largerImage.FileSize-originalImage.FileSize)/originalImage.FileSize),
-					}).Info("upsized image")
+						"area increace":      fmt.Sprintf("%.2f%%", areaIncrease),
+						"file size increace": fmt.Sprintf("%.2f%%", fileIncrease),
+					})
 				}
+				log.WithFields(log.Fields{
+					"path":               originalImage.LocalPath,
+					"original area":      originalImage.Area,
+					"new area":           largerImage.Area,
+					"area increace":      fmt.Sprintf("%.2f%%", areaIncrease),
+					"file size increace": fmt.Sprintf("%.2f%%", fileIncrease),
+				}).Info("upsized image")
 			default:
 				log.Infof("[%s] Skip !", path)
 			}
@@ -95,6 +102,10 @@ func main() {
 
 		return nil
 	}); err != nil {
-		log.Errorf("error getting larger image: %v", err)
+		log.Errorf("error in walk loop: %v", err)
+	}
+
+	for _, f := range warnings {
+		log.WithFields(f).Warn("upsized image is a lot bigger in file size")
 	}
 }

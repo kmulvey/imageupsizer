@@ -2,6 +2,7 @@ package imageupsizer
 
 import (
 	"bytes"
+	"crypto/tls"
 	"html"
 	"image"
 	"io/ioutil"
@@ -89,7 +90,19 @@ func uploadImage(filename string) ([]byte, error) {
 func getImage(url string) (*ImageData, error) {
 	var data = &ImageData{}
 
-	var resp, err = http.Get(url)
+	var httpCient = &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
+	var req, err = http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := httpCient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -134,9 +147,9 @@ func getImageList(contents []byte) (*ImageData, error) {
 	}
 
 	if len(largeImgURL) == 0 && bytes.Contains(contents, []byte("captcha")) {
-		return nil, errCaptcha
+		return nil, ErrCaptcha
 	} else if len(largeImgURL) == 0 {
-		return nil, errNoLargerAvailable
+		return nil, ErrNoLargerAvailable
 	}
 
 	req, err := http.NewRequest(http.MethodGet, largeImgURL, nil)
@@ -196,7 +209,7 @@ func getImageList(contents []byte) (*ImageData, error) {
 	}
 
 	if len(data) == 0 {
-		return nil, errNoResults
+		return nil, ErrNoResults
 	}
 
 	sort.Slice(data, func(i, j int) bool {
