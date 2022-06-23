@@ -3,6 +3,7 @@ package imageupsizer
 import (
 	"bytes"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"html"
 	"image"
@@ -13,6 +14,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strconv"
@@ -117,33 +119,33 @@ func getImage(url string) (*ImageData, error) {
 	}
 	defer resp.Body.Close()
 
-	//body, err := ioutil.ReadAll(resp.Body)
-	//if err != nil {
-	//	return nil, err
-	//}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
 
-	//if resp.StatusCode < 200 || resp.StatusCode > 299 {
-	//	return nil, fmt.Errorf("non 2xx resp code: %d", resp.StatusCode)
-	//}
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return nil, fmt.Errorf("non 2xx resp code: %d", resp.StatusCode)
+	}
 
-	//if strings.HasPrefix(resp.Header.Get("content-type"), "text/html") {
-	//	return nil, errors.New("resp was html: " + url)
-	//}
+	if strings.HasPrefix(resp.Header.Get("content-type"), "text/html") {
+		return nil, errors.New("resp was html: " + url)
+	}
 
 	imageDecode, ext, err := image.DecodeConfig(resp.Body)
 	if err != nil {
 		fmt.Println(resp.Header.Get("content-type"), resp.Status, ext, err)
-		//fmt.Println(len(body), url)
-		//ioutil.WriteFile(filepath.Base(url), body, 0755)
+		fmt.Println(len(body), url)
+		err = ioutil.WriteFile(filepath.Base(url), body, 0755)
 		return nil, err
 	}
 
 	data.URL = url
-	//data.Bytes = body
+	data.Bytes = body
 	data.Extension = ext
 	data.Config = imageDecode
 	data.Area = data.Config.Height * data.Config.Width
-	//data.FileSize = int64(len(body))
+	data.FileSize = int64(len(body))
 
 	return data, nil
 }
