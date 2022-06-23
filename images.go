@@ -107,7 +107,6 @@ func getImage(url string) (*ImageData, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error creating http req, url: %s, error: %w", url, err)
 	}
-	req.Header.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
 	req.Header.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:101.0) Gecko/20100101 Firefox/101.0")
 
 	resp, err := httpCient.Do(req)
@@ -132,7 +131,7 @@ func getImage(url string) (*ImageData, error) {
 	var cp = bytes.NewReader(body)
 	imageDecode, ext, err := image.DecodeConfig(cp)
 	if err != nil {
-		return nil, fmt.Errorf("error decoding image config, url: %s, error: %w", url, err)
+		return nil, fmt.Errorf("error decoding image config, length: %d, url: %s, error: %w", len(body), url, err)
 	}
 
 	data.URL = url

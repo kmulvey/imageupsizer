@@ -12,6 +12,8 @@ import (
 	"strings"
 	"syscall"
 
+	_ "golang.org/x/image/webp"
+
 	"github.com/kmulvey/imageconvert/pkg/imageconvert"
 	"github.com/kmulvey/imageupsizer"
 	"github.com/sirupsen/logrus"
