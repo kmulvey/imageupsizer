@@ -15,7 +15,6 @@ func FindLargerImageFromFile(filename string) (*ImageData, error) {
 		return nil, err
 	}
 
-	log.Infof("[%s] Uploading to google image server...", filename)
 	contents, err := uploadImage(filename)
 	if err != nil {
 		return nil, err

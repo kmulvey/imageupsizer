@@ -77,7 +77,7 @@ func main() {
 				largerImage, err := imageupsizer.GetLargerImageFromFile(path, outputPath)
 				if err != nil {
 					if errors.Is(err, imageupsizer.ErrNoLargerAvailable) || errors.Is(err, imageupsizer.ErrNoResults) {
-						log.Infof("[%s] Larger image not available", path)
+						log.Tracef("[%s] Larger image not available", path)
 						return nil // we just keep going
 					}
 					log.Errorf("GetLargerImageFromFile, %s, %v", path, err)
