@@ -14,7 +14,6 @@ import (
 
 	_ "golang.org/x/image/webp"
 
-	"github.com/kmulvey/imageconvert/pkg/imageconvert"
 	"github.com/kmulvey/imageupsizer"
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
@@ -87,7 +86,10 @@ func main() {
 				}
 
 				if largerImage.Area > originalImage.Width*originalImage.Height {
-					var rename, _ = imageconvert.Convert(largerImage.LocalPath)
+					var rename, _, err = imageupsizer.Convert(largerImage.LocalPath)
+					if err != nil {
+						return fmt.Errorf("error converting image: %s, err: %v", path, err)
+					}
 
 					// rename larger image to same name as original
 					err = os.Rename(rename, filepath.Join(outputPath, filepath.Base(path)))

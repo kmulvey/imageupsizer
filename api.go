@@ -5,8 +5,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // FindLargerImageFromFile takes a file and returns information about
@@ -46,7 +44,7 @@ func GetLargerImageFromFile(filename, outputDir string) (*ImageData, error) {
 
 	var newFile = filepath.Join(outputDir, path.Base(imageInfo.URL))
 	if err := ioutil.WriteFile(newFile, imageInfo.Bytes, os.ModePerm); err != nil {
-		log.Error(err)
+		return nil, err
 	}
 	imageInfo.LocalPath = newFile
 
