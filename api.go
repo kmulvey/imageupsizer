@@ -48,6 +48,16 @@ func GetLargerImageFromFile(filename, outputDir string) (*ImageData, error) {
 	}
 	imageInfo.LocalPath = newFile
 
+	// is the image a known error img?
+	errImg, err := isErrorImage(imageInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	if errImg {
+		return nil, ErrNoLargerAvailable
+	}
+
 	return imageInfo, ioutil.WriteFile(path.Base(imageInfo.URL), imageInfo.Bytes, 0755)
 }
 
