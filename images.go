@@ -19,7 +19,6 @@ import (
 	"strconv"
 	"strings"
 
-	_ "github.com/Kagami/go-avif"
 	_ "golang.org/x/image/webp"
 )
 
