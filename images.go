@@ -14,7 +14,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path/filepath"
 	"regexp"
 	"sort"
 	"strconv"
@@ -107,21 +106,20 @@ func getImage(url string) (*ImageData, error) {
 	}
 	var req, err = http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error creating http req, url: %s, error: %w", url, err)
 	}
 	req.Header.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
-	req.Header.Add("Accept-Encoding", "gzip, deflate, br")
 	req.Header.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:101.0) Gecko/20100101 Firefox/101.0")
 
 	resp, err := httpCient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error making http req, url: %s, error: %w", url, err)
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error reading resp.Body, url: %s, error: %w", url, err)
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
@@ -132,12 +130,10 @@ func getImage(url string) (*ImageData, error) {
 		return nil, errors.New("resp was html: " + url)
 	}
 
-	imageDecode, ext, err := image.DecodeConfig(resp.Body)
+	var cp = bytes.NewReader(body)
+	imageDecode, ext, err := image.DecodeConfig(cp)
 	if err != nil {
-		fmt.Println(resp.Header.Get("content-type"), resp.Status, ext, err)
-		fmt.Println(len(body), url)
-		err = ioutil.WriteFile(filepath.Base(url), body, 0755)
-		return nil, err
+		return nil, fmt.Errorf("error decoding image config, url: %s, error: %w", url, err)
 	}
 
 	data.URL = url
