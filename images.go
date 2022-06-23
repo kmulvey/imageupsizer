@@ -121,7 +121,7 @@ func getImage(url string) (*ImageData, error) {
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		return nil, fmt.Errorf("non 2xx resp code: %d", resp.StatusCode)
+		return nil, fmt.Errorf("non 2xx resp code: %d, url: %s", resp.StatusCode, url)
 	}
 
 	if strings.HasPrefix(resp.Header.Get("content-type"), "text/html") {
