@@ -9,6 +9,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// FindLargerImageFromFile takes a file and returns information about
+// a larger image that was found. It does NOT download the image.
 func FindLargerImageFromFile(filename string) (*ImageData, error) {
 	originalImage, err := GetImageConfigFromFile(filename)
 	if err != nil {
@@ -20,7 +22,7 @@ func FindLargerImageFromFile(filename string) (*ImageData, error) {
 		return nil, err
 	}
 
-	largerImage, err := getImageList(contents)
+	largerImage, err := getLargestImage(contents)
 	if err != nil {
 		return nil, err
 	}
@@ -30,6 +32,7 @@ func FindLargerImageFromFile(filename string) (*ImageData, error) {
 	return nil, ErrNoLargerAvailable
 }
 
+// GetLargerImageFromFile is just like FindLargerImageFromFile except it also downloads the file.
 func GetLargerImageFromFile(filename, outputDir string) (*ImageData, error) {
 	var largerImage, err = FindLargerImageFromFile(filename)
 	if err != nil {
@@ -50,6 +53,8 @@ func GetLargerImageFromFile(filename, outputDir string) (*ImageData, error) {
 	return imageInfo, ioutil.WriteFile(path.Base(imageInfo.URL), imageInfo.Bytes, 0755)
 }
 
+// FindLargerImageFromBytes takes a bytes and returns information about
+// a larger image that was found. It does NOT download the image.
 func FindLargerImageFromBytes(image []byte, outputFile string) (*ImageData, error) {
 	var tmpfile = "FindLargerImageFromBytesTmpfile.image"
 	defer os.Remove(tmpfile)
@@ -67,6 +72,7 @@ func FindLargerImageFromBytes(image []byte, outputFile string) (*ImageData, erro
 	return largerImage, os.Remove(tmpfile)
 }
 
+// GetLargerImageFromBytes is just like FindLargerImageFromBytes except it also downloads the file.
 func GetLargerImageFromBytes(image []byte, outputDir string) (*ImageData, error) {
 	var tmpfile = "GetLargerImageFromBytesTmpfile.image"
 	defer os.Remove(tmpfile)

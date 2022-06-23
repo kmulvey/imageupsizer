@@ -22,6 +22,7 @@ import (
 	_ "golang.org/x/image/webp"
 )
 
+// ImageData represents all the information about an image in the app
 type ImageData struct {
 	URL       string
 	Bytes     []byte
@@ -32,6 +33,8 @@ type ImageData struct {
 	LocalPath string
 }
 
+// uploadImage uploads the given image to google images
+// and returns the response as bytes.
 func uploadImage(filename string) ([]byte, error) {
 	var file, err = os.Open(filename)
 	if err != nil {
@@ -93,6 +96,8 @@ func uploadImage(filename string) ([]byte, error) {
 	return contents, nil
 }
 
+// getImage downloads the given image and returns the ImageData
+// which includes the []byte.
 func getImage(url string) (*ImageData, error) {
 	var data = &ImageData{}
 
@@ -144,7 +149,9 @@ func getImage(url string) (*ImageData, error) {
 	return data, nil
 }
 
-func getImageList(contents []byte) (*ImageData, error) {
+// getLargestImage parses the search results and returns the
+// largest image but does not download it.
+func getLargestImage(contents []byte) (*ImageData, error) {
 	var largeImgURL string
 	var r, err = regexp.Compile(`(/search\?.*?simg:.*?)">`)
 	if err != nil {
@@ -235,6 +242,7 @@ func getImageList(contents []byte) (*ImageData, error) {
 	return data[0], nil
 }
 
+// GetImageConfigFromFile returns ImageData for the given image
 func GetImageConfigFromFile(filename string) (*ImageData, error) {
 	var data = new(ImageData)
 	data.LocalPath = filename
