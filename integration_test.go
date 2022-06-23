@@ -1,7 +1,6 @@
 package imageupsizer
 
 import (
-	_ "image/jpeg"
 	"os"
 	"testing"
 
