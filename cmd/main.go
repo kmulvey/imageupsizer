@@ -96,11 +96,6 @@ func main() {
 					if err != nil {
 						return fmt.Errorf("replace old file, %s, %w", path, err)
 					}
-
-					err = os.Remove(filepath.Base(largerImage.LocalPath))
-					if err != nil {
-						return fmt.Errorf("remove downloaded file, %s, %w", largerImage.LocalPath, err)
-					}
 				} else {
 					// we dont want this file
 					err = os.Remove(filepath.Base(largerImage.LocalPath))
