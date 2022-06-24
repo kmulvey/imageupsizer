@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 )
 
 // FindLargerImageFromFile takes a file and returns information about
@@ -41,8 +42,14 @@ func GetLargerImageFromFile(filename, outputDir string) (*ImageData, error) {
 	if err != nil {
 		return nil, err
 	}
+	// some file names are crazy long and cant be
+	// a named FS file
+	largerImageName, err := cleanURL(path.Base(imageInfo.URL), imageInfo.Extension)
+	if err != nil {
+		return nil, err
+	}
 
-	var newFile = filepath.Join(outputDir, path.Base(imageInfo.URL))
+	var newFile = filepath.Join(outputDir, largerImageName)
 	if err := ioutil.WriteFile(newFile, imageInfo.Bytes, os.ModePerm); err != nil {
 		return nil, err
 	}
@@ -57,8 +64,7 @@ func GetLargerImageFromFile(filename, outputDir string) (*ImageData, error) {
 	if errImg {
 		return nil, ErrNoLargerAvailable
 	}
-
-	return imageInfo, ioutil.WriteFile(path.Base(imageInfo.URL), imageInfo.Bytes, 0755)
+	return imageInfo, nil
 }
 
 // FindLargerImageFromBytes takes a bytes and returns information about
@@ -90,4 +96,20 @@ func GetLargerImageFromBytes(image []byte, outputDir string) (*ImageData, error)
 		return nil, err
 	}
 	return GetLargerImageFromFile(tmpfile, outputDir)
+}
+
+func cleanURL(link, ext string) (string, error) {
+
+	var re, err = regexp.Compile(`[^\w]`)
+	if err != nil {
+		return "", err
+	}
+
+	var largerImageName = re.ReplaceAllString(link, "")
+
+	if len(largerImageName) > 100 {
+		largerImageName = largerImageName[:100] + "." + ext
+	}
+
+	return largerImageName, nil
 }

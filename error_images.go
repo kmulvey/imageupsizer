@@ -32,9 +32,6 @@ func isErrorImage(img *ImageData) (bool, error) {
 		return false, fmt.Errorf("error hasing file: %w", err)
 	}
 
-	if _, exists := hashes[hash]; !exists {
-		return true, nil
-	}
-
-	return false, nil
+	_, exists := hashes[hash]
+	return exists, nil
 }
