@@ -62,6 +62,9 @@ func GetLargerImageFromFile(filename, outputDir string) (*ImageData, error) {
 	}
 
 	if errImg {
+		if err := os.Remove(newFile); err != nil {
+			return nil, err
+		}
 		return nil, ErrNoLargerAvailable
 	}
 	return imageInfo, nil
