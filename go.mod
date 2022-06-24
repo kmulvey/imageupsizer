@@ -4,9 +4,8 @@ go 1.18
 
 require (
 	github.com/kmulvey/concurrenthash v0.4.1
-	github.com/kmulvey/imageconvert v1.0.2
 	github.com/sirupsen/logrus v1.8.1
-	github.com/stretchr/testify v1.7.4
+	github.com/stretchr/testify v1.7.5
 	golang.org/x/image v0.0.0-20220617043117-41969df76e82
 )
 
