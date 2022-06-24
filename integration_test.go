@@ -19,3 +19,9 @@ func TestEverything(t *testing.T) {
 
 	assert.NoError(t, os.Remove(largerImage.LocalPath))
 }
+
+func TestErrorImg(t *testing.T) {
+	var isError, err = isErrorImage(&ImageData{LocalPath: "./error-image.jpg"})
+	assert.NoError(t, err)
+	assert.True(t, isError)
+}
