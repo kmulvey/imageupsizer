@@ -1,8 +1,8 @@
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/kmulvey/concurrenthash v0.4.1 h1:qgN2F5c/Eqd+7UOtwwQ86iv29/l6Q89LpCY0VEFzT2k=
-github.com/kmulvey/concurrenthash v0.4.1/go.mod h1:gieHtBPAdTJwY1vl4k/5yr9Ey5CNoCGu6HIIDMp8B3g=
+github.com/kmulvey/concurrenthash v1.0.0 h1:Hzmc0ljBOQb6OXQosppD572S7GsfroTuaS95zRk6YzA=
+github.com/kmulvey/concurrenthash v1.0.0/go.mod h1:xr81bDUE/5fAFiugyUt5x52jziZde4Lu5rVM6I4C26E=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/sirupsen/logrus v1.8.1 h1:dJKuHgqk1NNQlqoA6BTlM1Wf9DOH3NBjQyu0h9+AZZE=
