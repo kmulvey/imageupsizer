@@ -9,7 +9,7 @@ import (
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
-	"io/ioutil"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -41,8 +41,7 @@ func uploadImage(filename string) ([]byte, error) {
 		return nil, fmt.Errorf("error opening file; file: %s, error: %w", filename, err)
 	}
 	defer file.Close()
-
-	fileContents, err := ioutil.ReadAll(file)
+	fileContents, err := io.ReadAll(file)
 	if err != nil {
 		return nil, fmt.Errorf("error reading image contents; file: %s, error: %w", filename, err)
 	}
@@ -88,7 +87,7 @@ func uploadImage(filename string) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 
-	contents, err := ioutil.ReadAll(resp.Body)
+	contents, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error reading resp.Body; file: %s, error: %w", filename, err)
 	}
@@ -120,7 +119,7 @@ func getImage(url string) (*ImageData, error) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error reading resp.Body, url: %s, error: %w", url, err)
 	}
@@ -190,7 +189,7 @@ func getLargestImage(contents []byte) (*ImageData, error) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error reading resp.Body, error: %w", err)
 	}
@@ -258,7 +257,7 @@ func GetImageConfigFromFile(filename string) (*ImageData, error) {
 		return nil, fmt.Errorf("error decoding image: %s, error: %w", filename, err)
 	}
 
-	imageBody, err := ioutil.ReadAll(file)
+	imageBody, err := io.ReadAll(file)
 	if err != nil {
 		return nil, fmt.Errorf("error reading image contents: %s, error: %w", filename, err)
 	}

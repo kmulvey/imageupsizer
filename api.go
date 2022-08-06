@@ -1,7 +1,6 @@
 package imageupsizer
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -50,7 +49,7 @@ func GetLargerImageFromFile(filename, outputDir string) (*ImageData, error) {
 	}
 
 	var newFile = filepath.Join(outputDir, largerImageName)
-	if err := ioutil.WriteFile(newFile, imageInfo.Bytes, os.ModePerm); err != nil {
+	if err := os.WriteFile(newFile, imageInfo.Bytes, os.ModePerm); err != nil {
 		return nil, err
 	}
 	imageInfo.LocalPath = newFile
@@ -76,7 +75,7 @@ func FindLargerImageFromBytes(image []byte, outputFile string) (*ImageData, erro
 	var tmpfile = "FindLargerImageFromBytesTmpfile.image"
 	defer os.Remove(tmpfile)
 
-	var err = ioutil.WriteFile(tmpfile, image, 0755)
+	var err = os.WriteFile(tmpfile, image, 0755)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +93,7 @@ func GetLargerImageFromBytes(image []byte, outputDir string) (*ImageData, error)
 	var tmpfile = "GetLargerImageFromBytesTmpfile.image"
 	defer os.Remove(tmpfile)
 
-	var err = ioutil.WriteFile(tmpfile, image, 0755)
+	var err = os.WriteFile(tmpfile, image, 0755)
 	if err != nil {
 		return nil, err
 	}
