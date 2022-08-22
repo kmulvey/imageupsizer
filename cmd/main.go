@@ -9,22 +9,28 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"syscall"
+	"time"
 
 	_ "golang.org/x/image/webp"
 
+	"github.com/kmulvey/humantime"
 	"github.com/kmulvey/imageupsizer"
+	"github.com/kmulvey/path"
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 )
 
 func main() {
-	var inputPath string
+	var inputPath path.Path
 	var outputPath string
 	var logLevel string
-	flag.StringVar(&inputPath, "input", "", "A image file or directory path")
+	var tr humantime.TimeRange
+	flag.Var(&inputPath, "path", "path to files, globbing must be quoted")
 	flag.StringVar(&outputPath, "output", "", "A directory to put the larger image in")
+	flag.Var(&tr, "modified-since", "process files chnaged since this time")
 	flag.StringVar(&logLevel, "log-level", "error", "Set the level of log output: (info, warn, error)")
 	flag.Parse()
 
@@ -39,7 +45,8 @@ func main() {
 		flag.PrintDefaults()
 	}
 
-	if len(inputPath) == 0 || len(outputPath) == 0 {
+	if len(inputPath.Files) == 0 {
+		log.Error("path not provided")
 		flag.PrintDefaults()
 		return
 	}
@@ -49,94 +56,112 @@ func main() {
 		return
 	}
 
+	log.Info("building file list")
+	files, err := getFileList(inputPath, tr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	var signals = make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 
 	log.WithFields(log.Fields{
-		"inputDir":  inputPath,
-		"outputDir": outputPath,
-		"log-level": logLevel,
+		"inputDir":       inputPath.Input,
+		"outputDir":      outputPath,
+		"modified-since": tr.From,
+		"log-level":      logLevel,
 	}).Info("Started")
 
 	var warnings []logrus.Fields
-	var errorShutdown = errors.New("done")
-	if err := filepath.Walk(inputPath, func(path string, info os.FileInfo, err error) error {
-		if !info.IsDir() {
-			switch filepath.Ext(path) {
-			case ".jpg", ".png", ".jpeg", "webp":
-				if len(signals) > 0 {
-					log.Info("shutting down")
-					return errorShutdown
-				}
+	for _, path := range files {
+		if len(signals) > 0 {
+			log.Info("shutting down")
+			break
+		}
 
-				log.Tracef("[%s] Getting original image info...", path)
-				var originalImage, err = imageupsizer.GetImageConfigFromFile(path)
-				if err != nil {
-					return fmt.Errorf("GetImageConfigFromFile, %s, %w", path, err)
-				}
+		log.Tracef("[%s] Getting original image info...", path)
+		var originalImage, err = imageupsizer.GetImageConfigFromFile(path)
+		if err != nil {
+			log.Errorf("GetImageConfigFromFile, %s, %s", path, err.Error())
+			continue
+		}
 
-				largerImage, err := imageupsizer.GetLargerImageFromFile(path, outputPath)
-				if err != nil {
-					if errors.Is(err, imageupsizer.ErrNoLargerAvailable) || errors.Is(err, imageupsizer.ErrNoResults) {
-						log.Tracef("[%s] Larger image not available", path)
-						return nil // we just keep going
-					}
-					log.Errorf("GetLargerImageFromFile, %s, %v", path, err)
-					return nil
-				}
+		largerImage, err := imageupsizer.GetLargerImageFromFile(path, outputPath)
+		if err != nil {
+			if errors.Is(err, imageupsizer.ErrNoLargerAvailable) || errors.Is(err, imageupsizer.ErrNoResults) {
+				log.Tracef("[%s] Larger image not available", path)
+				continue // we just keep going
+			}
+			log.Errorf("GetLargerImageFromFile, %s, %v", path, err)
+			continue
+		}
 
-				if largerImage.Area > originalImage.Width*originalImage.Height {
-					var rename, _, err = imageupsizer.Convert(largerImage.LocalPath)
-					if err != nil {
-						return fmt.Errorf("error converting image: %s, err: %v", path, err)
-					}
+		if largerImage.Area > originalImage.Width*originalImage.Height {
+			var rename, _, err = imageupsizer.Convert(largerImage.LocalPath)
+			if err != nil {
+				log.Errorf("error converting image: %s, err: %v", path, err)
+				continue
+			}
 
-					// rename larger image to same name as original
-					err = os.Rename(rename, filepath.Join(outputPath, filepath.Base(path)))
-					if err != nil {
-						return fmt.Errorf("replace old file, %s, %w", path, err)
-					}
-				} else {
-					// we dont want this file
-					err = os.Remove(filepath.Base(largerImage.LocalPath))
-					if err != nil {
-						return fmt.Errorf("remove downloaded file, %s, %w", largerImage.LocalPath, err)
-					}
-					return nil
-				}
-				var areaIncrease = ((float64(largerImage.Area) - float64(originalImage.Area)) / float64(originalImage.Area)) * 100
-				var fileIncrease = ((float64(largerImage.FileSize) - float64(originalImage.FileSize)) / float64(originalImage.FileSize)) * 100
-
-				if fileIncrease > areaIncrease {
-					warnings = append(warnings, log.Fields{
-						"path":               originalImage.LocalPath,
-						"original area":      originalImage.Area,
-						"new area":           largerImage.Area,
-						"area increace":      fmt.Sprintf("%.2f%%", areaIncrease),
-						"file size increace": fmt.Sprintf("%.2f%%", fileIncrease),
-					})
-				}
-				log.WithFields(log.Fields{
-					"path":               originalImage.LocalPath,
-					"original area":      originalImage.Area,
-					"new area":           largerImage.Area,
-					"area increace":      fmt.Sprintf("%.2f%%", areaIncrease),
-					"file size increace": fmt.Sprintf("%.2f%%", fileIncrease),
-				}).Info("upsized image")
-
-			default:
-				log.Infof("[%s] Skip !", path)
+			// rename larger image to same name as original
+			err = os.Rename(rename, filepath.Join(outputPath, filepath.Base(path)))
+			if err != nil {
+				log.Errorf("replace old file, %s, %s", path, err.Error())
+				continue
+			}
+		} else {
+			// we dont want this file
+			err = os.Remove(filepath.Base(largerImage.LocalPath))
+			if err != nil {
+				log.Errorf("remove downloaded file, %s, %s", largerImage.LocalPath, err.Error())
+				continue
 			}
 		}
+		var areaIncrease = ((float64(largerImage.Area) - float64(originalImage.Area)) / float64(originalImage.Area)) * 100
+		var fileIncrease = ((float64(largerImage.FileSize) - float64(originalImage.FileSize)) / float64(originalImage.FileSize)) * 100
 
-		return nil
-	}); err != nil {
-		if !errors.Is(err, errorShutdown) {
-			log.Errorf("error in walk loop: %v", err)
+		if fileIncrease > areaIncrease {
+			warnings = append(warnings, log.Fields{
+				"path":               originalImage.LocalPath,
+				"original area":      originalImage.Area,
+				"new area":           largerImage.Area,
+				"area increace":      fmt.Sprintf("%.2f%%", areaIncrease),
+				"file size increace": fmt.Sprintf("%.2f%%", fileIncrease),
+			})
 		}
+		log.WithFields(log.Fields{
+			"path":               originalImage.LocalPath,
+			"original area":      originalImage.Area,
+			"new area":           largerImage.Area,
+			"area increace":      fmt.Sprintf("%.2f%%", areaIncrease),
+			"file size increace": fmt.Sprintf("%.2f%%", fileIncrease),
+		}).Info("upsized image")
+
 	}
 
 	for _, f := range warnings {
 		log.WithFields(f).Warn("upsized image is a lot bigger in file size")
 	}
+}
+
+// getFileList filters the file list
+func getFileList(inputPath path.Path, modSince humantime.TimeRange) ([]string, error) {
+
+	var nilTime = time.Time{}
+	var err error
+	var trimmedFileList []path.File
+
+	modSince.From = time.Date(2022, time.August, 01, 0, 0, 0, 0, time.Local)
+
+	if modSince.From != nilTime {
+		trimmedFileList, err = path.FilterFilesSinceDate(inputPath.Files, modSince.From)
+		if err != nil {
+			return nil, fmt.Errorf("unable to filter files by skip map")
+		}
+	}
+
+	trimmedFileList = path.FilterFilesByRegex(trimmedFileList, regexp.MustCompile(".*.jpg$|.*.jpeg$|.*.png$|.*.webp$"))
+
+	// these are all the files all the way down the dir tree
+	return path.DirEntryToString(trimmedFileList), nil
 }
