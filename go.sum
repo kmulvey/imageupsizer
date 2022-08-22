@@ -7,8 +7,8 @@ github.com/kmulvey/concurrenthash v1.1.0 h1:rA4TCESDpjXHjLK4E7FZ6DaDUf7Pcr0L1f7Z
 github.com/kmulvey/concurrenthash v1.1.0/go.mod h1:L5FFUWJFIM+qBHGB053SgCZXoLypRbNJmWx5LVSfJFo=
 github.com/kmulvey/humantime v0.4.1 h1:783r2jMiN9k1hBbS04f/EY3BwnjwsG+eykVcYzVOfaI=
 github.com/kmulvey/humantime v0.4.1/go.mod h1:iQiJH8ULb3NaSHcwrLTHlT0S3+/UDbPDnC6fXTTtznI=
-github.com/kmulvey/path v0.4.2 h1:leinp+Sa9e8t8dq8Q41Tb/+Wdv5Voeu+8Rmj4NtG7Zk=
-github.com/kmulvey/path v0.4.2/go.mod h1:u97sgsO0Gu4hbiaZUWHapc/Fn7nXJTX+5afajRDfo+k=
+github.com/kmulvey/path v0.4.3 h1:QmbQGPl2QI81bGM09x8OA4KHb6WoIZSSXW0EfoxD44Y=
+github.com/kmulvey/path v0.4.3/go.mod h1:u97sgsO0Gu4hbiaZUWHapc/Fn7nXJTX+5afajRDfo+k=
 github.com/kr/pretty v0.1.0 h1:L/CwN0zerZDmRFUapSPitk6f+Q3+0za1rQkzVuMiMFI=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
