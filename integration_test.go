@@ -8,6 +8,8 @@ import (
 )
 
 func TestEverything(t *testing.T) {
+	t.Parallel()
+
 	var originalImage, err = GetImageConfigFromFile("./test.jpg")
 	assert.NoError(t, err)
 
@@ -21,6 +23,8 @@ func TestEverything(t *testing.T) {
 }
 
 func TestErrorImg(t *testing.T) {
+	t.Parallel()
+
 	var isError, err = isErrorImage(&ImageData{LocalPath: "./error-image.jpg"})
 	assert.NoError(t, err)
 	assert.True(t, isError)

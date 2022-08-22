@@ -43,10 +43,7 @@ func GetLargerImageFromFile(filename, outputDir string) (*ImageData, error) {
 	}
 	// some file names are crazy long and cant be
 	// a named FS file
-	largerImageName, err := cleanURL(path.Base(imageInfo.URL), imageInfo.Extension)
-	if err != nil {
-		return nil, err
-	}
+	var largerImageName = cleanURL(path.Base(imageInfo.URL), imageInfo.Extension)
 
 	var newFile = filepath.Join(outputDir, largerImageName)
 	if err := os.WriteFile(newFile, imageInfo.Bytes, os.ModePerm); err != nil {
@@ -75,7 +72,7 @@ func FindLargerImageFromBytes(image []byte, outputFile string) (*ImageData, erro
 	var tmpfile = "FindLargerImageFromBytesTmpfile.image"
 	defer os.Remove(tmpfile)
 
-	var err = os.WriteFile(tmpfile, image, 0755)
+	var err = os.WriteFile(tmpfile, image, 0600)
 	if err != nil {
 		return nil, err
 	}
@@ -93,19 +90,16 @@ func GetLargerImageFromBytes(image []byte, outputDir string) (*ImageData, error)
 	var tmpfile = "GetLargerImageFromBytesTmpfile.image"
 	defer os.Remove(tmpfile)
 
-	var err = os.WriteFile(tmpfile, image, 0755)
+	var err = os.WriteFile(tmpfile, image, 0600)
 	if err != nil {
 		return nil, err
 	}
 	return GetLargerImageFromFile(tmpfile, outputDir)
 }
 
-func cleanURL(link, ext string) (string, error) {
+func cleanURL(link, ext string) string {
 
-	var re, err = regexp.Compile(`[^\w]`)
-	if err != nil {
-		return "", err
-	}
+	var re = regexp.MustCompile(`[^\w]`)
 
 	var largerImageName = re.ReplaceAllString(link, "")
 
@@ -113,5 +107,5 @@ func cleanURL(link, ext string) (string, error) {
 		largerImageName = largerImageName[:100] + "." + ext
 	}
 
-	return largerImageName, nil
+	return largerImageName
 }

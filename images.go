@@ -152,10 +152,7 @@ func getImage(url string) (*ImageData, error) {
 // largest image but does not download it.
 func getLargestImage(contents []byte) (*ImageData, error) {
 	var largeImgURL string
-	var r, err = regexp.Compile(`(/search\?.*?simg:.*?)">`)
-	if err != nil {
-		return nil, fmt.Errorf("error compiling regex, error: %w", err)
-	}
+	var r = regexp.MustCompile(`(/search\?.*?simg:.*?)">`)
 
 	for _, i := range r.FindAllStringSubmatch(string(contents), -1) {
 		if len(i) < 2 {
@@ -193,18 +190,15 @@ func getLargestImage(contents []byte) (*ImageData, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error reading resp.Body, error: %w", err)
 	}
-	imgInfo, err := regexp.Compile(`\["(https://.*?.)",(\d+),(\d+)\]`)
-	if err != nil {
-		return nil, fmt.Errorf("error compiling regex, error: %w", err)
-	}
+	var imgInfo = regexp.MustCompile(`\["(https://.*?.)",(\d+),(\d+)\]`)
 
-	var data []*ImageData
-	for _, i := range imgInfo.FindAllStringSubmatch(string(body), -1) {
-		if len(i) < 4 {
+	var data = make([]*ImageData, len(imgInfo.FindAllStringSubmatch(string(body), -1)))
+	for i, arr := range imgInfo.FindAllStringSubmatch(string(body), -1) {
+		if len(arr) < 4 {
 			continue
 		}
 
-		urlUnquote, err := strconv.Unquote("\"" + i[1] + "\"")
+		urlUnquote, err := strconv.Unquote("\"" + arr[1] + "\"")
 		if err != nil {
 			continue
 		}
@@ -214,20 +208,20 @@ func getLargestImage(contents []byte) (*ImageData, error) {
 			continue
 		}
 
-		imgHeight, err := strconv.Atoi(i[2])
+		imgHeight, err := strconv.Atoi(arr[2])
 		if err != nil {
 			continue
 		}
 
-		imgWidth, err := strconv.Atoi(i[3])
+		imgWidth, err := strconv.Atoi(arr[3])
 		if err != nil {
 			continue
 		}
 
-		data = append(data, &ImageData{
+		data[i] = &ImageData{
 			URL:  imgURL.String(),
 			Area: imgHeight * imgWidth,
-		})
+		}
 	}
 
 	if len(data) == 0 {
