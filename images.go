@@ -192,8 +192,8 @@ func getLargestImage(contents []byte) (*ImageData, error) {
 	}
 	var imgInfo = regexp.MustCompile(`\["(https://.*?.)",(\d+),(\d+)\]`)
 
-	var data = make([]*ImageData, len(imgInfo.FindAllStringSubmatch(string(body), -1)))
-	for i, arr := range imgInfo.FindAllStringSubmatch(string(body), -1) {
+	var data []*ImageData
+	for _, arr := range imgInfo.FindAllStringSubmatch(string(body), -1) {
 		if len(arr) < 4 {
 			continue
 		}
@@ -218,10 +218,10 @@ func getLargestImage(contents []byte) (*ImageData, error) {
 			continue
 		}
 
-		data[i] = &ImageData{
+		data = append(data, &ImageData{
 			URL:  imgURL.String(),
 			Area: imgHeight * imgWidth,
-		}
+		})
 	}
 
 	if len(data) == 0 {
