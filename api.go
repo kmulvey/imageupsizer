@@ -41,8 +41,7 @@ func GetLargerImageFromFile(filename, outputDir string) (*ImageData, error) {
 	if err != nil {
 		return nil, err
 	}
-	// some file names are crazy long and cant be
-	// a named FS file
+	// some file names are crazy long and cant be a named FS file
 	var largerImageName = cleanURL(path.Base(imageInfo.URL), imageInfo.Extension)
 
 	var newFile = filepath.Join(outputDir, largerImageName)
@@ -105,6 +104,8 @@ func cleanURL(link, ext string) string {
 
 	if len(largerImageName) > 100 {
 		largerImageName = largerImageName[:100] + "." + ext
+	} else {
+		largerImageName = largerImageName + "." + ext
 	}
 
 	return largerImageName
