@@ -35,6 +35,8 @@ func main() {
 	flag.Parse()
 
 	switch strings.ToLower(logLevel) {
+	case "trace":
+		log.SetLevel(log.TraceLevel)
 	case "info":
 		log.SetLevel(log.InfoLevel)
 	case "warn":
