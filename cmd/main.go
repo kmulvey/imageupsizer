@@ -151,12 +151,10 @@ func getFileList(inputPath path.Path, modSince humantime.TimeRange) ([]string, e
 
 	var nilTime = time.Time{}
 	var err error
-	var trimmedFileList []path.File
-
-	modSince.From = time.Date(2022, time.August, 01, 0, 0, 0, 0, time.Local)
+	var trimmedFileList = inputPath.Files
 
 	if modSince.From != nilTime {
-		trimmedFileList, err = path.FilterFilesSinceDate(inputPath.Files, modSince.From)
+		trimmedFileList, err = path.FilterFilesByDateRange(trimmedFileList, modSince.From, modSince.To)
 		if err != nil {
 			return nil, fmt.Errorf("unable to filter files by skip map")
 		}
