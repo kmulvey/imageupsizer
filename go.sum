@@ -5,12 +5,12 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/kmulvey/concurrenthash v1.1.0 h1:rA4TCESDpjXHjLK4E7FZ6DaDUf7Pcr0L1f7ZDZrAx5w=
 github.com/kmulvey/concurrenthash v1.1.0/go.mod h1:L5FFUWJFIM+qBHGB053SgCZXoLypRbNJmWx5LVSfJFo=
-github.com/kmulvey/goutils v0.3.0 h1:rcf+TEDJN6wb6pZogqu5srBRCLjx6xIMEu3PMNBjXJg=
-github.com/kmulvey/goutils v0.3.0/go.mod h1:DCUhjtkRdyTKfAWTNgYCL/JhQeYLGZLMuP1YeubD+g0=
+github.com/kmulvey/goutils v0.3.1 h1:VeBnUspYeGzLIQGGva+ftw3wu8pWCDX2377N29UORrQ=
+github.com/kmulvey/goutils v0.3.1/go.mod h1:DCUhjtkRdyTKfAWTNgYCL/JhQeYLGZLMuP1YeubD+g0=
 github.com/kmulvey/humantime v0.4.2 h1:UA6mvfkKybNpCwG2h7xIooESzyLWqf9zsoDxUSnYUS8=
 github.com/kmulvey/humantime v0.4.2/go.mod h1:iQiJH8ULb3NaSHcwrLTHlT0S3+/UDbPDnC6fXTTtznI=
-github.com/kmulvey/path v0.5.0 h1:CuOYGoLAXjRY0+XtgYXgzE0WLje5MseaH/yx8IR7UEM=
-github.com/kmulvey/path v0.5.0/go.mod h1:j1m3od0WKuktkb/TxnWQaZ/r1eB6oCCzqonEDFz4O+8=
+github.com/kmulvey/path v0.7.1 h1:KgKqDYH4+96y4oT5Bpqak1ZmYSf9s4tpe3RK4Zvm6SA=
+github.com/kmulvey/path v0.7.1/go.mod h1:i2I12ZB9enQFA0m+W0dm4xjYzIhQXGXIlLGFHFwTvlI=
 github.com/kr/pretty v0.1.0 h1:L/CwN0zerZDmRFUapSPitk6f+Q3+0za1rQkzVuMiMFI=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
