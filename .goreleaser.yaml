@@ -5,8 +5,16 @@ before:
     # You may remove this if you don't use go modules.
     - go mod tidy
 builds:
-  - id: google_image_upsizer
-    main: cmd/main.go
+  - id: imageupsizer
+    main: cmd/imageupsizer/main.go
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+  - id: imageupsizer-manual
+    main: cmd/manual/main.go
     env:
       - CGO_ENABLED=0
     goos:
