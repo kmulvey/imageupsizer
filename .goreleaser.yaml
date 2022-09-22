@@ -7,14 +7,16 @@ before:
 builds:
   - id: imageupsizer
     main: cmd/imageupsizer/main.go
+    binary: imageupsizer
     env:
       - CGO_ENABLED=0
     goos:
       - linux
       - windows
       - darwin
-  - id: imageupsizer-manual
+  - id: manualmover
     main: cmd/manual/main.go
+    binary: manualmover
     env:
       - CGO_ENABLED=0
     goos:
