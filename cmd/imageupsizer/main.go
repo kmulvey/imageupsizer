@@ -154,7 +154,7 @@ func getFileList(inputPath path.Path, modSince humantime.TimeRange) ([]string, e
 	var trimmedFileList = inputPath.Files
 
 	if modSince.From != nilTime {
-		trimmedFileList, err = path.FilterFilesByDateRange(trimmedFileList, modSince.From, modSince.To)
+		trimmedFileList = path.FilterFilesByDateRange(trimmedFileList, modSince.From, modSince.To)
 		if err != nil {
 			return nil, fmt.Errorf("unable to filter files by skip map")
 		}
@@ -163,5 +163,5 @@ func getFileList(inputPath path.Path, modSince humantime.TimeRange) ([]string, e
 	trimmedFileList = path.FilterFilesByRegex(trimmedFileList, regexp.MustCompile(".*.jpg$|.*.jpeg$|.*.png$|.*.webp$"))
 
 	// these are all the files all the way down the dir tree
-	return path.DirEntryToString(trimmedFileList), nil
+	return path.OnlyNames(trimmedFileList), nil
 }
