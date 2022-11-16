@@ -7,7 +7,7 @@ require (
 	github.com/kmulvey/humantime v0.4.3
 	github.com/kmulvey/path v0.9.0
 	github.com/sirupsen/logrus v1.9.0
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	golang.org/x/image v0.0.0-20220902085622-e7cb96979f69
 )
 
