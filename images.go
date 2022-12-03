@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"html"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
@@ -14,9 +13,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"regexp"
-	"sort"
-	"strconv"
 	"strings"
 
 	_ "golang.org/x/image/webp"
@@ -95,6 +91,16 @@ func uploadImage(filename string) ([]byte, error) {
 	return contents, nil
 }
 
+func getURLFromUploadResponse(html []byte) (*url.URL, error) {
+
+	var redirectUrl = urlRegex.Find(html)
+	if len(redirectUrl) == 0 {
+		return nil, errors.New("did not find enough the url from upload response")
+	}
+
+	return url.Parse(string(redirectUrl))
+}
+
 // getImage downloads the given image and returns the ImageData
 // which includes the []byte.
 func getImage(url string) (*ImageData, error) {
@@ -146,93 +152,6 @@ func getImage(url string) (*ImageData, error) {
 	data.FileSize = int64(len(body))
 
 	return data, nil
-}
-
-// getLargestImage parses the search results and returns the
-// largest image but does not download it.
-func getLargestImage(contents []byte) (*ImageData, error) {
-	var largeImgURL string
-	var r = regexp.MustCompile(`(/search\?.*?simg:.*?)">`)
-
-	for _, i := range r.FindAllStringSubmatch(string(contents), -1) {
-		if len(i) < 2 {
-			continue
-		}
-
-		if strings.Contains(i[1], ",isz:l") {
-			largeImgURL = "https://google.com" + html.UnescapeString(i[1])
-			break
-		}
-	}
-
-	if len(largeImgURL) == 0 && bytes.Contains(contents, []byte("captcha")) {
-		return nil, ErrCaptcha
-	} else if len(largeImgURL) == 0 {
-		return nil, ErrNoLargerAvailable
-	}
-
-	req, err := http.NewRequest(http.MethodGet, largeImgURL, nil)
-	if err != nil {
-		return nil, fmt.Errorf("error creating http req, error: %w", err)
-	}
-	req.Header.Add("origin", "https://images.google.com/")
-	req.Header.Add("referer", "https://images.google.com/")
-	req.Header.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36")
-
-	var client = &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("error making http req, error: %w", err)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("error reading resp.Body, error: %w", err)
-	}
-	var imgInfo = regexp.MustCompile(`\["(https://.*?.)",(\d+),(\d+)\]`)
-
-	var data []*ImageData
-	for _, arr := range imgInfo.FindAllStringSubmatch(string(body), -1) {
-		if len(arr) < 4 {
-			continue
-		}
-
-		urlUnquote, err := strconv.Unquote("\"" + arr[1] + "\"")
-		if err != nil {
-			continue
-		}
-
-		imgURL, err := url.Parse(urlUnquote)
-		if err != nil {
-			continue
-		}
-
-		imgHeight, err := strconv.Atoi(arr[2])
-		if err != nil {
-			continue
-		}
-
-		imgWidth, err := strconv.Atoi(arr[3])
-		if err != nil {
-			continue
-		}
-
-		data = append(data, &ImageData{
-			URL:  imgURL.String(),
-			Area: imgHeight * imgWidth,
-		})
-	}
-
-	if len(data) == 0 {
-		return nil, ErrNoResults
-	}
-
-	sort.Slice(data, func(i, j int) bool {
-		return data[i].Area > data[j].Area
-	})
-
-	return data[0], nil
 }
 
 // GetImageConfigFromFile returns ImageData for the given image

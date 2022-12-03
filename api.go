@@ -1,6 +1,7 @@
 package imageupsizer
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -10,20 +11,42 @@ import (
 // FindLargerImageFromFile takes a file and returns information about
 // a larger image that was found. It does NOT download the image.
 func FindLargerImageFromFile(filename string) (*ImageData, error) {
+
 	originalImage, err := GetImageConfigFromFile(filename)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error from GetImageConfigFromFile: %w", err)
 	}
 
-	contents, err := uploadImage(filename)
+	redirectHTML, err := uploadImage(filename)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error from uploadImage: %w", err)
 	}
 
-	largerImage, err := getLargestImage(contents)
+	redirectURL, err := getURLFromUploadResponse(redirectHTML)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error from getURLFromUploadResponse: %w", err)
 	}
+
+	foundURL, err := scrape(redirectURL.String(), findImageSourceLinkInHtml)
+	if err != nil {
+		return nil, fmt.Errorf("error from scrape found url: %w", err)
+	}
+
+	allSizesURL, err := scrape(foundURL.String(), findAllSizesLinkInHtml)
+	if err != nil {
+		return nil, fmt.Errorf("error from scrape all sizes: %w", err)
+	}
+
+	largestImageURL, err := scrape(allSizesURL.String(), findLargestImageLinkInHtml)
+	if err != nil {
+		return nil, fmt.Errorf("error from scrape largest image: %w", err)
+	}
+
+	largerImage, err := getImage(largestImageURL.String())
+	if err != nil {
+		return nil, fmt.Errorf("error from getImage: %w", err)
+	}
+
 	if largerImage.Area > originalImage.Width*originalImage.Height {
 		return largerImage, nil
 	}
