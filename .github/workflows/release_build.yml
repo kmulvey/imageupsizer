@@ -31,6 +31,8 @@ jobs:
 
       - name: Build & Test
         run: |
+          which chrome
+          chrome --version
           go mod tidy
           go test -v -race -count 1 -parallel 5 -covermode=atomic -coverprofile=coverage.out ./...
           go build -v -ldflags="-s -w" ./...
