@@ -71,7 +71,7 @@ func uploadImage(filename string) ([]byte, error) {
 		return nil, fmt.Errorf("error closing html form writer; file: %s, error: %w", filename, err)
 	}
 
-	req, err := http.NewRequest(http.MethodPost, "https://images.google.com/searchbyimage/upload", buf)
+	req, err := http.NewRequest(http.MethodPost, "https://lens.google.com/upload?re=df&st=1670027884133&ep=gisbubb", buf)
 	if err != nil {
 		return nil, fmt.Errorf("error creating http request; file: %s, error: %w", filename, err)
 	}
