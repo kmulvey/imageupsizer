@@ -21,6 +21,8 @@ jobs:
           go-version: 1.19
         id: go
 
+      - uses: browser-actions/setup-chrome@latest
+
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
