@@ -53,7 +53,7 @@ func main() {
 		return
 	}
 
-	if err := os.MkdirAll(outputPath.Input, os.ModePerm); err != nil {
+	if err := os.MkdirAll(outputPath.GivenInput, os.ModePerm); err != nil {
 		log.Error("output path must be directory: ", outputPath)
 		return
 	}
@@ -63,12 +63,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Infof("upsizing %d files", len(files))
 
 	var signals = make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 
 	log.WithFields(log.Fields{
-		"inputDir":       inputPath.Input,
+		"inputDir":       inputPath.GivenInput,
 		"outputDir":      outputPath,
 		"modified-since": tr.From,
 		"log-level":      logLevel,
@@ -88,7 +89,7 @@ func main() {
 			continue
 		}
 
-		largerImage, err := imageupsizer.GetLargerImageFromFile(path, outputPath.Input)
+		largerImage, err := imageupsizer.GetLargerImageFromFile(path, outputPath.GivenInput)
 		if err != nil {
 			if errors.Is(err, imageupsizer.ErrNoLargerAvailable) || errors.Is(err, imageupsizer.ErrNoResults) {
 				log.Tracef("[%s] Larger image not available", path)
@@ -106,7 +107,7 @@ func main() {
 			}
 
 			// rename larger image to same name as original
-			err = os.Rename(rename, filepath.Join(outputPath.Input, filepath.Base(path)))
+			err = os.Rename(rename, filepath.Join(outputPath.GivenInput, filepath.Base(path)))
 			if err != nil {
 				log.Errorf("replace old file, %s, %s", path, err.Error())
 				continue
@@ -154,13 +155,13 @@ func getFileList(inputPath path.Path, modSince humantime.TimeRange) ([]string, e
 	var trimmedFileList = inputPath.Files
 
 	if modSince.From != nilTime {
-		trimmedFileList = path.FilterFilesByDateRange(trimmedFileList, modSince.From, modSince.To)
+		trimmedFileList = path.FilterEntities(trimmedFileList, path.NewDateEntitiesFilter(modSince.From, modSince.To))
 		if err != nil {
 			return nil, fmt.Errorf("unable to filter files by skip map")
 		}
 	}
 
-	trimmedFileList = path.FilterFilesByRegex(trimmedFileList, regexp.MustCompile(".*.jpg$|.*.jpeg$|.*.png$|.*.webp$"))
+	trimmedFileList = path.FilterEntities(trimmedFileList, path.NewRegexEntitiesFilter(regexp.MustCompile(".*.jpg$|.*.jpeg$|.*.png$|.*.webp$")))
 
 	// these are all the files all the way down the dir tree
 	return path.OnlyNames(trimmedFileList), nil
