@@ -40,12 +40,12 @@ func main() {
 		return
 	}
 
-	if err := os.MkdirAll(oldDir.Input, os.ModePerm); err != nil {
+	if err := os.MkdirAll(oldDir.GivenInput, os.ModePerm); err != nil {
 		log.Error("output path must be directory: ", oldDir)
 		return
 	}
 
-	var files = path.FilterFilesByRegex(newFiles.Files, regexp.MustCompile(".*.jpg$|.*.jpeg$|.*.png$|.*.webp$"))
+	var files = path.FilterEntities(newFiles.Files, path.NewRegexEntitiesFilter(regexp.MustCompile(".*.jpg$|.*.jpeg$|.*.png$|.*.webp$")))
 
 	for _, file := range files {
 		var newImage, err = imageupsizer.GetImageConfigFromFile(file.AbsolutePath)
@@ -53,23 +53,23 @@ func main() {
 			log.Errorf("GetImageConfigFromFile, %s, %s", file.AbsolutePath, err.Error())
 			continue
 		}
-		oldImage, err := imageupsizer.GetImageConfigFromFile(filepath.Join(oldDir.Input, filepath.Base(file.AbsolutePath)))
+		oldImage, err := imageupsizer.GetImageConfigFromFile(filepath.Join(oldDir.GivenInput, filepath.Base(file.AbsolutePath)))
 		if err != nil {
 			log.Errorf("GetImageConfigFromFile, %s, %s", file.AbsolutePath, err.Error())
 			continue
 		}
 
 		if newImage.Area > oldImage.Area {
-			err = os.Rename(newImage.LocalPath, filepath.Join(oldDir.Input, filepath.Base(file.AbsolutePath)))
+			err = os.Rename(newImage.LocalPath, filepath.Join(oldDir.GivenInput, filepath.Base(file.AbsolutePath)))
 			if err != nil {
-				log.Errorf("rename %s to %s, err: %s", newImage.LocalPath, filepath.Join(oldDir.Input, filepath.Base(file.AbsolutePath)), err.Error())
+				log.Errorf("rename %s to %s, err: %s", newImage.LocalPath, filepath.Join(oldDir.GivenInput, filepath.Base(file.AbsolutePath)), err.Error())
 				continue
 			}
 			log.WithFields(log.Fields{
 				"old":  oldImage.Area,
 				"new":  newImage.Area,
 				"from": newImage.LocalPath,
-				"to":   filepath.Join(oldDir.Input, filepath.Base(newImage.LocalPath)),
+				"to":   filepath.Join(oldDir.GivenInput, filepath.Base(newImage.LocalPath)),
 			}).Info("move")
 		}
 	}
