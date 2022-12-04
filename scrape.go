@@ -78,3 +78,14 @@ func findImageSourceLinkInHtml(html string) (*url.URL, error) {
 
 	return url.Parse(link)
 }
+
+func findImageInFacebookHtml(html string) (*url.URL, error) {
+	html = strings.TrimSpace(html)
+	var wideURLRegex = regexp.MustCompile(`additional_profile_has_taggable_products.*accessibility_caption`)
+	var js = wideURLRegex.FindString(html)
+
+	var begin = strings.Index(js, `{"uri":"`) + 8
+	var end = strings.Index(js, `","width"`)
+
+	return url.Parse(strings.ReplaceAll(js[begin:end], "\\/", "/"))
+}

@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 
 	_ "golang.org/x/image/webp"
@@ -135,6 +136,13 @@ func getImage(url string) (*ImageData, error) {
 	}
 
 	if strings.HasPrefix(resp.Header.Get("content-type"), "text/html") {
+		if regexp.MustCompile(`fbsbx|facebook`).MatchString(url) {
+			fbImageURL, err := scrape(url, findImageInFacebookHtml)
+			if err != nil {
+				return nil, fmt.Errorf("error getting facebook image url, url: %s, error: %w", url, err)
+			}
+			return getImage(fbImageURL.String())
+		}
 		return nil, errors.New("resp was html: " + url)
 	}
 
