@@ -6,50 +6,69 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // FindLargerImageFromFile takes a file and returns information about
 // a larger image that was found. It does NOT download the image.
 func FindLargerImageFromFile(filename string) (*ImageData, error) {
 
+	log.Tracef("[%s] Get Image Config for original file", filename)
 	originalImage, err := GetImageConfigFromFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("error from GetImageConfigFromFile: %w", err)
 	}
+	log.Tracef("[%s] Got Image Config for original file", filename)
 
+	log.Tracef("[%s] Upload original file", filename)
 	redirectHTML, err := uploadImage(filename)
 	if err != nil {
 		return nil, fmt.Errorf("error from uploadImage: %w", err)
 	}
+	log.Tracef("[%s] Uploaded original file", filename)
 
+	log.Tracef("[%s] Getting redirect url", filename)
 	redirectURL, err := getURLFromUploadResponse(redirectHTML)
 	if err != nil {
 		return nil, fmt.Errorf("error from getURLFromUploadResponse: %w", err)
 	}
+	log.Tracef("[%s] Got redirect url: %s", filename, redirectURL)
 
+	log.Tracef("[%s] Getting image source url", filename)
 	foundURL, err := scrape(redirectURL.String(), findImageSourceLinkInHtml)
 	if err != nil {
 		return nil, fmt.Errorf("error from scrape found url: %w", err)
 	}
+	log.Tracef("[%s] Got image source url: %s", filename, foundURL)
 
+	log.Tracef("[%s] Getting all sizes url", filename)
 	allSizesURL, err := scrape(foundURL.String(), findAllSizesLinkInHtml)
 	if err != nil {
 		return nil, fmt.Errorf("error from scrape all sizes: %w", err)
 	}
+	log.Tracef("[%s] Got all sizes url: %s", filename, allSizesURL)
 
+	log.Tracef("[%s] Getting largest image url", filename)
 	largestImageURL, err := scrape(allSizesURL.String(), findLargestImageLinkInHtml)
 	if err != nil {
 		return nil, fmt.Errorf("error from scrape largest image: %w", err)
 	}
+	log.Tracef("[%s] Got largest image url: %s", filename, largestImageURL)
 
+	log.Tracef("[%s] Downloading largest image", filename)
 	largerImage, err := getImage(largestImageURL.String())
 	if err != nil {
 		return nil, fmt.Errorf("error from getImage: %w", err)
 	}
+	log.Tracef("[%s] Downloaded largest image", filename)
 
 	if largerImage.Area > originalImage.Width*originalImage.Height {
+		log.Tracef("[%s] Larger image not found", filename)
 		return largerImage, nil
 	}
+	log.Tracef("[%s] Larger image found", filename)
+
 	return nil, ErrNoLargerAvailable
 }
 
