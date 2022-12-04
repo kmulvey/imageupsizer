@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/url"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -13,6 +14,8 @@ import (
 )
 
 var urlRegex = regexp.MustCompile(`(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])`)
+var OtherSizesNotAvailableError = errors.New("No other sizes of this image found.")
+var NoMatchesError = errors.New("Looks like there aren’t any matches for your search")
 
 func scrape(url string, linkFn findUrlFunc) (*url.URL, error) {
 	// create chrome instance
@@ -57,6 +60,10 @@ func findLargestImageLinkInHtml(html string) (*url.URL, error) {
 
 	var urls = urlRegex.FindAllString(jsBlock[1], 2)
 	if len(urls) < 2 {
+		if regexp.MustCompile("Looks like there aren’t any matches for your search").MatchString(html) {
+			return nil, NoMatchesError
+		}
+		os.WriteFile("largest_image.html", []byte(html), os.ModePerm)
 		return nil, errors.New("did not find enough urls")
 	}
 
@@ -66,7 +73,15 @@ func findAllSizesLinkInHtml(html string) (*url.URL, error) {
 	// cast a wide net around the link so we make sure we get it
 	var wideLinkRegex = regexp.MustCompile(`\/search\?tbs=simg:.*>All sizes`)
 	var wideLink = wideLinkRegex.FindString(html)
-	var link = wideLink[:strings.Index(wideLink, `"`)]
+	var index = strings.Index(wideLink, `"`)
+	if index == -1 {
+		if regexp.MustCompile(`No other sizes of this image found.`).MatchString(html) {
+			return nil, OtherSizesNotAvailableError
+		}
+		os.WriteFile("all_sizes.html", []byte(html), os.ModePerm)
+		return nil, errors.New("wide link not found in html, html dumped to all_sizes.html")
+	}
+	var link = wideLink[:index]
 	link = strings.ReplaceAll(link, "&amp;", "&")
 
 	return url.Parse("https://www.google.com" + link)
