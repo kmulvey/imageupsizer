@@ -82,16 +82,9 @@ func main() {
 			break
 		}
 
-		log.Tracef("[%s] Getting original image info...", path)
-		var originalImage, err = imageupsizer.GetImageConfigFromFile(path)
-		if err != nil {
-			log.Errorf("GetImageConfigFromFile, %s, %s", path, err.Error())
-			continue
-		}
-
 		largerImage, err := imageupsizer.GetLargerImageFromFile(path, outputPath.GivenInput)
 		if err != nil {
-			if errors.Is(err, imageupsizer.ErrNoLargerAvailable) || errors.Is(err, imageupsizer.ErrNoResults) {
+			if errors.Is(err, imageupsizer.ErrNoLargerAvailable) || errors.Is(err, imageupsizer.ErrNoResults) || errors.Is(err, imageupsizer.OtherSizesNotAvailableError) || errors.Is(err, imageupsizer.NoMatchesError) {
 				log.Tracef("[%s] Larger image not available", path)
 				continue // we just keep going
 			}
@@ -99,27 +92,25 @@ func main() {
 			continue
 		}
 
-		if largerImage.Area > originalImage.Width*originalImage.Height {
-			var rename, _, err = imageupsizer.Convert(largerImage.LocalPath)
-			if err != nil {
-				log.Errorf("error converting image: %s, err: %v", path, err)
-				continue
-			}
-
-			// rename larger image to same name as original
-			err = os.Rename(rename, filepath.Join(outputPath.GivenInput, filepath.Base(path)))
-			if err != nil {
-				log.Errorf("replace old file, %s, %s", path, err.Error())
-				continue
-			}
-		} else {
-			// we dont want this file
-			err = os.Remove(filepath.Base(largerImage.LocalPath))
-			if err != nil {
-				log.Errorf("remove downloaded file, %s, %s", largerImage.LocalPath, err.Error())
-				continue
-			}
+		originalImage, err := imageupsizer.GetImageConfigFromFile(path)
+		if err != nil {
+			log.Errorf("GetImageConfigFromFile, %s, %s", path, err.Error())
+			continue
 		}
+
+		rename, _, err := imageupsizer.Convert(largerImage.LocalPath)
+		if err != nil {
+			log.Errorf("error converting image: %s, err: %v", path, err)
+			continue
+		}
+
+		// rename larger image to same name as original
+		err = os.Rename(rename, filepath.Join(outputPath.GivenInput, filepath.Base(path)))
+		if err != nil {
+			log.Errorf("replace old file, %s, %s", path, err.Error())
+			continue
+		}
+
 		var areaIncrease = ((float64(largerImage.Area) - float64(originalImage.Area)) / float64(originalImage.Area)) * 100
 		var fileIncrease = ((float64(largerImage.FileSize) - float64(originalImage.FileSize)) / float64(originalImage.FileSize)) * 100
 
