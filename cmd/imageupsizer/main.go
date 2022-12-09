@@ -25,11 +25,11 @@ import (
 
 func main() {
 	var inputPath path.Path
-	var outputPath path.Path
+	var outputPath string
 	var logLevel string
 	var tr humantime.TimeRange
 	flag.Var(&inputPath, "input", "path to files, globbing must be quoted")
-	flag.Var(&outputPath, "output", "A directory to put the larger image in")
+	flag.StringVar(&outputPath, "output", "./upsize", "A directory to put the larger image in")
 	flag.Var(&tr, "modified-since", "process files chnaged since this time")
 	flag.StringVar(&logLevel, "log-level", "error", "Set the level of log output: (info, warn, error)")
 	flag.Parse()
@@ -53,7 +53,7 @@ func main() {
 		return
 	}
 
-	if err := os.MkdirAll(outputPath.GivenInput, os.ModePerm); err != nil {
+	if err := os.MkdirAll(outputPath, os.ModePerm); err != nil {
 		log.Error("output path must be directory: ", outputPath)
 		return
 	}
@@ -82,7 +82,7 @@ func main() {
 			break
 		}
 
-		largerImage, err := imageupsizer.GetLargerImageFromFile(path, outputPath.GivenInput)
+		largerImage, err := imageupsizer.GetLargerImageFromFile(path, outputPath)
 		if err != nil {
 			if errors.Is(err, imageupsizer.ErrNoLargerAvailable) || errors.Is(err, imageupsizer.ErrNoResults) || errors.Is(err, imageupsizer.OtherSizesNotAvailableError) || errors.Is(err, imageupsizer.NoMatchesError) {
 				log.Tracef("[%s] Larger image not available", path)
@@ -105,7 +105,7 @@ func main() {
 		}
 
 		// rename larger image to same name as original
-		err = os.Rename(rename, filepath.Join(outputPath.GivenInput, filepath.Base(path)))
+		err = os.Rename(rename, filepath.Join(outputPath, filepath.Base(path)))
 		if err != nil {
 			log.Errorf("replace old file, %s, %s", path, err.Error())
 			continue
@@ -130,7 +130,6 @@ func main() {
 			"area increace":      fmt.Sprintf("%.2f%%", areaIncrease),
 			"file size increace": fmt.Sprintf("%.2f%%", fileIncrease),
 		}).Info("upsized image")
-
 	}
 
 	for _, f := range warnings {
