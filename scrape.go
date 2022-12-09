@@ -3,6 +3,7 @@ package imageupsizer
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/url"
 	"os"
 	"regexp"
@@ -63,7 +64,12 @@ func findLargestImageLinkInHtml(html string) (*url.URL, error) {
 		if regexp.MustCompile("Looks like there aren’t any matches for your search").MatchString(html) {
 			return nil, NoMatchesError
 		}
-		os.WriteFile("largest_image.html", []byte(html), os.ModePerm)
+
+		var err = os.WriteFile("largest_image.html", []byte(html), os.ModePerm)
+		if err != nil {
+			return nil, fmt.Errorf("could not dump to largest_image.html, err: %w", err)
+		}
+
 		return nil, errors.New("did not find enough urls")
 	}
 
@@ -78,7 +84,12 @@ func findAllSizesLinkInHtml(html string) (*url.URL, error) {
 		if regexp.MustCompile(`No other sizes of this image found.`).MatchString(html) {
 			return nil, OtherSizesNotAvailableError
 		}
-		os.WriteFile("all_sizes.html", []byte(html), os.ModePerm)
+
+		var err = os.WriteFile("all_sizes.html", []byte(html), os.ModePerm)
+		if err != nil {
+			return nil, fmt.Errorf("could not dump to all_sizes.html, err: %w", err)
+		}
+
 		return nil, errors.New("wide link not found in html, html dumped to all_sizes.html")
 	}
 	var link = wideLink[:index]
