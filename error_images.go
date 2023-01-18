@@ -8,7 +8,7 @@ import (
 	"github.com/kmulvey/concurrenthash"
 )
 
-var ch *concurrenthash.ConcurrentHash
+var ch concurrenthash.ConcurrentHash
 
 var hashes = map[string]struct{}{
 	"e663f9122d24f60aade166046334e60b1e195ad95a8946227e8c03cfd14031684a2f7acdcfa7322f96650259f79791c661e9b7e006735958f019c081c43bc128": {},
