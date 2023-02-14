@@ -10,7 +10,7 @@ require (
 	github.com/kmulvey/path v0.14.2
 	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/testify v1.8.1
-	golang.org/x/image v0.3.0
+	golang.org/x/image v0.5.0
 )
 
 require (
