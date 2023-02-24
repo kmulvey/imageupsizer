@@ -24,12 +24,12 @@ import (
 )
 
 func main() {
-	var inputPath path.Path
-	var outputPath string
+	var inputEntry path.Entry
+	var outputEntry string
 	var logLevel string
 	var tr humantime.TimeRange
-	flag.Var(&inputPath, "input", "path to files, globbing must be quoted")
-	flag.StringVar(&outputPath, "output", "./upsize", "A directory to put the larger image in")
+	flag.Var(&inputEntry, "input", "path to files, globbing must be quoted")
+	flag.StringVar(&outputEntry, "output", "./output", "A directory to put the larger image in")
 	flag.Var(&tr, "modified-since", "process files chnaged since this time")
 	flag.StringVar(&logLevel, "log-level", "error", "Set the level of log output: (info, warn, error)")
 	flag.Parse()
@@ -47,19 +47,24 @@ func main() {
 		flag.PrintDefaults()
 	}
 
-	if len(inputPath.Files) == 0 {
+	var inputFiles, err = inputEntry.Flatten()
+	if err != nil {
+		log.Fatalf("error flattening newFiles: %s", err)
+	}
+
+	if len(inputFiles) == 0 {
 		log.Error("path not provided")
 		flag.PrintDefaults()
 		return
 	}
 
-	if err := os.MkdirAll(outputPath, os.ModePerm); err != nil {
-		log.Error("output path must be directory: ", outputPath)
+	if err := os.MkdirAll(outputEntry, os.ModePerm); err != nil {
+		log.Error("output path must be directory: ", outputEntry)
 		return
 	}
 
 	log.Info("building file list")
-	files, err := getFileList(inputPath, tr)
+	files, err := getFileList(inputEntry, tr)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,8 +74,8 @@ func main() {
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 
 	log.WithFields(log.Fields{
-		"inputDir":       inputPath.GivenInput,
-		"outputDir":      outputPath,
+		"inputDir":       inputEntry.String(),
+		"outputDir":      outputEntry,
 		"modified-since": tr.From,
 		"log-level":      logLevel,
 	}).Info("Started")
@@ -82,7 +87,7 @@ func main() {
 			break
 		}
 
-		largerImage, err := imageupsizer.GetLargerImageFromFile(path, outputPath)
+		largerImage, err := imageupsizer.GetLargerImageFromFile(path, outputEntry)
 		if err != nil {
 			if errors.Is(err, imageupsizer.ErrNoLargerAvailable) || errors.Is(err, imageupsizer.ErrNoResults) || errors.Is(err, imageupsizer.OtherSizesNotAvailableError) || errors.Is(err, imageupsizer.NoMatchesError) {
 				log.Tracef("[%s] Larger image not available", path)
@@ -105,7 +110,7 @@ func main() {
 		}
 
 		// rename larger image to same name as original
-		err = os.Rename(rename, filepath.Join(outputPath, filepath.Base(path)))
+		err = os.Rename(rename, filepath.Join(outputEntry, filepath.Base(path)))
 		if err != nil {
 			log.Errorf("replace old file, %s, %s", path, err.Error())
 			continue
@@ -138,11 +143,11 @@ func main() {
 }
 
 // getFileList filters the file list
-func getFileList(inputPath path.Path, modSince humantime.TimeRange) ([]string, error) {
+func getFileList(inputPath path.Entry, modSince humantime.TimeRange) ([]string, error) {
 
 	var nilTime = time.Time{}
 	var err error
-	var trimmedFileList = inputPath.Files
+	var trimmedFileList = inputPath.Children
 
 	if modSince.From != nilTime {
 		trimmedFileList = path.FilterEntities(trimmedFileList, path.NewDateEntitiesFilter(modSince.From, modSince.To))
