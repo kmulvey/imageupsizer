@@ -17,4 +17,5 @@ google_image_upsizer
 cmd/imageupsizer/imageupsizer
 cmd/manual/manual
 cmd/cmd
+cmd/verify/verify
 dist/
