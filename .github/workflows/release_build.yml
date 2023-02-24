@@ -7,7 +7,6 @@ jobs:
     name: imageupsizer build
     strategy:
       matrix:
-        go-version: [1.19.x]
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
 
@@ -18,10 +17,17 @@ jobs:
       - name: Set up Go 
         uses: actions/setup-go@v3
         with:
-          go-version: 1.19
-        id: go
+          check-latest: true
+          cache: true
+          go-version: '1.20'
 
       - uses: browser-actions/setup-chrome@latest
+      
+      - name: Build & Test
+        run: |
+          go mod tidy
+          go test -v -race -count 1 -parallel 5 -covermode=atomic -coverprofile=coverage.out ./...
+          go build -v -ldflags="-s -w" ./...
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
@@ -30,15 +36,8 @@ jobs:
           args: --timeout=5m
 
       - name: Govulncheck
-        uses: kmulvey/govulncheck-action@main
+        uses: kmulvey/govulncheck-action@v1.1.2
 
-      - name: Build & Test
-        run: |
-          #which chrome
-          #chrome --version
-          go mod tidy
-          #go test -v -race -count 1 -parallel 5 -covermode=atomic -coverprofile=coverage.out ./...
-          go build -v -ldflags="-s -w" ./...
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3  
         with:
@@ -57,14 +56,15 @@ jobs:
       - name: Set up Go 
         uses: actions/setup-go@v3
         with:
-          go-version: 1.19
-        id: go
+          check-latest: true
+          cache: true
+          go-version: '1.20'
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v3
         with:
           version: latest
-          args: release --config .goreleaser.yaml --rm-dist
+          args: release --config .goreleaser.yaml --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GO_RELEASER_GITHUB_TOKEN }}
 
