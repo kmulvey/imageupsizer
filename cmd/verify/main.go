@@ -39,7 +39,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	var upsizedFiles, err = upsizedImagesEntry.Flatten()
+	var upsizedFiles, err = upsizedImagesEntry.Flatten(false)
 	if err != nil {
 		log.Fatalf("error getting upsized files: %s", err)
 		os.Exit(1)

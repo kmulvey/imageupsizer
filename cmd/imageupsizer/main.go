@@ -47,7 +47,7 @@ func main() {
 		flag.PrintDefaults()
 	}
 
-	var inputFiles, err = inputEntry.Flatten()
+	var inputFiles, err = inputEntry.Flatten(false)
 	if err != nil {
 		log.Fatalf("error flattening newFiles: %s", err)
 	}
@@ -64,10 +64,7 @@ func main() {
 	}
 
 	log.Info("building file list")
-	files, err := getFileList(inputEntry, tr)
-	if err != nil {
-		log.Fatal(err)
-	}
+	var files = getFileList(inputEntry, tr)
 	log.Infof("upsizing %d files", len(files))
 
 	var signals = make(chan os.Signal, 1)
@@ -143,21 +140,17 @@ func main() {
 }
 
 // getFileList filters the file list
-func getFileList(inputPath path.Entry, modSince humantime.TimeRange) ([]string, error) {
+func getFileList(inputPath path.Entry, modSince humantime.TimeRange) []string {
 
 	var nilTime = time.Time{}
-	var err error
 	var trimmedFileList = inputPath.Children
 
 	if modSince.From != nilTime {
 		trimmedFileList = path.FilterEntities(trimmedFileList, path.NewDateEntitiesFilter(modSince.From, modSince.To))
-		if err != nil {
-			return nil, fmt.Errorf("unable to filter files by skip map")
-		}
 	}
 
 	trimmedFileList = path.FilterEntities(trimmedFileList, path.NewRegexEntitiesFilter(regexp.MustCompile(".*.jpg$|.*.jpeg$|.*.png$|.*.webp$")))
 
 	// these are all the files all the way down the dir tree
-	return path.OnlyNames(trimmedFileList), nil
+	return path.OnlyNames(trimmedFileList)
 }

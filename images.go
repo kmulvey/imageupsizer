@@ -110,6 +110,7 @@ func getImage(url string) (*ImageData, error) {
 	var httpCient = &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
+				//nolint:gosec
 				InsecureSkipVerify: true,
 			},
 		},

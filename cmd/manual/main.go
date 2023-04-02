@@ -34,7 +34,7 @@ func main() {
 		flag.PrintDefaults()
 	}
 
-	var newFiles, err = newFilesEntry.Flatten()
+	var newFiles, err = newFilesEntry.Flatten(false)
 	if err != nil {
 		log.Fatalf("error flattening newFiles: %s", err)
 	}
