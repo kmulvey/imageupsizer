@@ -1,0 +1,34 @@
+# Options for analysis running.
+run:
+  concurrency: 2
+  timeout: 10m
+  tests: true
+  modules-download-mode: readonly
+  go: "1.20"
+linters:
+  #enable-all: true
+  enable:
+    - bidichk
+    - bodyclose
+    - containedctx
+      #- cyclop
+      #- dupl
+    - exportloopref
+    - gocritic
+    - goconst
+    - gosec
+    - misspell
+    - nilerr
+    - paralleltest
+    - prealloc
+      #    - unparam  https://github.com/mvdan/unparam/issues/52
+    - usestdlibvars
+    - wastedassign
+linters-settings:
+  govet:
+    check-shadowing: false
+    disable-all: false
+    enable-all: true
+    disable:
+      - shadow
+      - fieldalignment # giving false positives

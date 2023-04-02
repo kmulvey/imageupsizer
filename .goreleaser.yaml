@@ -1,35 +1,50 @@
-# This is an example .goreleaser.yml file with some sensible defaults.
-# Make sure to check the documentation at https://goreleaser.com
 before:
   hooks:
-    # You may remove this if you don't use go modules.
     - go mod tidy
+
 builds:
   - id: imageupsizer
     main: cmd/imageupsizer/main.go
     binary: imageupsizer
+    ldflags:
+      - -s -w -X main.build={{.Version}}
     env:
       - CGO_ENABLED=0
     goos:
-      - linux
+      - freebsd
       - windows
       - darwin
+      - linux
+      - js
+    goarch:
+      - amd64
+      - arm64
+
   - id: manualmover
     main: cmd/manual/main.go
     binary: manualmover
+    ldflags:
+      - -s -w -X main.build={{.Version}}
     env:
       - CGO_ENABLED=0
     goos:
-      - linux
+      - freebsd
       - windows
       - darwin
+      - linux
+      - js
+    goarch:
+      - amd64
+      - arm64
+
 archives:
-  - replacements:
-      darwin: Darwin
-      linux: Linux
-      windows: Windows
-      386: i386
-      amd64: x86_64
+  - id: dist
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
 checksum:
   name_template: 'checksums.txt'
 snapshot:
