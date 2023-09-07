@@ -10,7 +10,7 @@ require (
 	github.com/kmulvey/path v1.21.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/testify v1.8.2
-	go.szostok.io/version v1.1.0
+	go.szostok.io/version v1.2.0
 	golang.org/x/image v0.6.0
 )
 
@@ -28,7 +28,7 @@ require (
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
 	github.com/gobwas/ws v1.1.0 // indirect
-	github.com/goccy/go-yaml v1.10.1 // indirect
+	github.com/goccy/go-yaml v1.11.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/go-version v1.6.0 // indirect
 	github.com/hokaccha/go-prettyjson v0.0.0-20211117102719-0474bc63780f // indirect
