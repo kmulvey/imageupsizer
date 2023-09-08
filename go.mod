@@ -3,12 +3,12 @@ module github.com/kmulvey/imageupsizer
 go 1.19
 
 require (
-	github.com/chromedp/cdproto v0.0.0-20230329100754-6125fc8d7142
-	github.com/chromedp/chromedp v0.9.1
+	github.com/chromedp/cdproto v0.0.0-20230802225258-3cf4e6d46a89
+	github.com/chromedp/chromedp v0.9.2
 	github.com/kmulvey/concurrenthash v1.4.0
 	github.com/kmulvey/humantime v0.4.4
-	github.com/sirupsen/logrus v1.9.3
 	github.com/kmulvey/path v1.21.0
+	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.8.2
 	go.szostok.io/version v1.2.0
 	golang.org/x/image v0.6.0
@@ -27,7 +27,7 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
-	github.com/gobwas/ws v1.1.0 // indirect
+	github.com/gobwas/ws v1.2.1 // indirect
 	github.com/goccy/go-yaml v1.11.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/go-version v1.6.0 // indirect
