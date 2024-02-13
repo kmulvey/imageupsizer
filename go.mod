@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/chromedp/cdproto v0.0.0-20230329100754-6125fc8d7142
 	github.com/chromedp/chromedp v0.9.1
-	github.com/kmulvey/concurrenthash v1.4.0
+	github.com/kmulvey/concurrenthash v1.5.2
 	github.com/kmulvey/humantime v0.4.4
 	github.com/kmulvey/path v1.21.0
 	github.com/sirupsen/logrus v1.9.3
@@ -49,7 +49,7 @@ require (
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/twmb/murmur3 v1.1.6 // indirect
+	github.com/twmb/murmur3 v1.1.7 // indirect
 	golang.org/x/crypto v0.7.0 // indirect
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29 // indirect
 	golang.org/x/sync v0.1.0 // indirect
