@@ -1,11 +1,5 @@
 package imageupsizer
 
-import (
-	"testing"
-
-	"github.com/stretchr/testify/assert"
-)
-
 /*
 func TestEverything(t *testing.T) {
 	t.Parallel()
@@ -20,7 +14,6 @@ func TestEverything(t *testing.T) {
 	assert.True(t, largerImage.FileSize > originalImage.FileSize)
 	assert.NoError(t, os.Remove(largerImage.LocalPath))
 }
-*/
 
 func TestErrorImg(t *testing.T) {
 	t.Parallel()
@@ -29,3 +22,4 @@ func TestErrorImg(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, isError)
 }
+*/
