@@ -25,12 +25,12 @@ var hashes = map[string]struct{}{
 }
 
 func init() {
-	ch = concurrenthash.NewConcurrentHash(context.Background(), 2, 2, sha512.New)
+	ch = concurrenthash.NewConcurrentHash(2, 2, sha512.New)
 }
 
 func isErrorImage(img *ImageData) (bool, error) {
 
-	var hash, err = ch.HashFile(img.LocalPath)
+	var hash, err = ch.HashFile(context.Background(), img.LocalPath)
 	if err != nil {
 		return false, fmt.Errorf("error hasing file: %w", err)
 	}
