@@ -1,57 +1,141 @@
 before:
   hooks:
     - go mod tidy
-
 builds:
+  
   - id: imageupsizer
-    main: cmd/imageupsizer/main.go
+    main: ./cmd/imageupsizer
+    env:
+      - CGO_ENABLED=0
     binary: imageupsizer
     ldflags:
       - -s -w -X main.build={{.Version}}
-    env:
-      - CGO_ENABLED=0
+      - -X go.szostok.io/version.version={{.Version}}
+      - -X go.szostok.io/version.buildDate={{.Date}}
     goos:
       - freebsd
       - windows
       - darwin
       - linux
       - js
+
     goarch:
       - amd64
       - arm64
 
-  - id: manualmover
-    main: cmd/manual/main.go
-    binary: manualmover
-    ldflags:
-      - -s -w -X main.build={{.Version}}
+  - id: imageupsizer-manual
+    main: ./cmd/manual
     env:
       - CGO_ENABLED=0
+    binary: imageupsizer-manual
+    ldflags:
+      - -s -w -X main.build={{.Version}}
+      - -X go.szostok.io/version.version={{.Version}}
+      - -X go.szostok.io/version.buildDate={{.Date}}
     goos:
       - freebsd
       - windows
       - darwin
       - linux
       - js
+
+    goarch:
+      - amd64
+      - arm64
+
+  - id: imageupsizer-verify
+    main: ./cmd/verify
+    env:
+      - CGO_ENABLED=0
+    binary: imageupsizer-verify
+    ldflags:
+      - -s -w -X main.build={{.Version}}
+      - -X go.szostok.io/version.version={{.Version}}
+      - -X go.szostok.io/version.buildDate={{.Date}}
+    goos:
+      - freebsd
+      - windows
+      - darwin
+      - linux
+      - js
+
     goarch:
       - amd64
       - arm64
 
 archives:
-  - id: dist
+  - id: foo
     name_template: >-
       {{ .ProjectName }}_
       {{- title .Os }}_
       {{- if eq .Arch "amd64" }}x86_64
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
+
 checksum:
   name_template: 'checksums.txt'
+
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
-changelog:
-  sort: asc
-  filters:
-    exclude:
-      - '^docs:'
-      - '^test:'
+  name_template: "{{ incpatch .Version }}-snapshot"
+
+nfpms:
+  # note that this is an array of nfpm configs
+  - # ID of the nfpm config, must be unique.
+    id: imageupsizer
+
+    package_name: imageupsizer
+
+    builds:
+      - imageupsizer
+      - imageupsizer-manual
+      - imageupsizer-verify
+
+    # Your app's vendor.
+    vendor: Kevin Mulvey
+
+    # Your app's homepage.
+    homepage: https://github.com/kmulvey/imageupsizer
+
+    # Your app's maintainer (probably you).
+    maintainer: Drummer <drum-roll@example.com>
+
+    # Your app's description.
+    description: |-
+      Automatically upscale images across multiple GPUs.
+
+    # Your app's license.
+    license: MIT
+
+    # Formats to be generated.
+    formats:
+      - apk
+      - deb
+      - rpm
+      - termux.deb
+      - archlinux
+
+    provides:
+      - imageupsizer
+      - imageupsizer-manual
+      - imageupsizer-verify
+
+    # Path that the binaries should be installed.
+    # Default: '/usr/bin'
+    bindir: /usr/bin
+
+    # Custom configuration applied only to the RPM packager.
+    rpm:
+      group: root
+      compression: lzma
+      # The package is signed if a key_file is set
+      #signature:
+      # PGP secret key file path (can also be ASCII-armored).
+      # The passphrase is taken from the environment variable
+      # `$NFPM_ID_RPM_PASSPHRASE` with a fallback to `$NFPM_ID_PASSPHRASE`,
+      # where ID is the id of the current nfpm config.
+      # The id will be transformed to uppercase.
+      # E.g. If your nfpm id is 'default' then the rpm-specific passphrase
+      # should be set as `$NFPM_DEFAULT_RPM_PASSPHRASE`
+      #
+      # Templates: allowed
+      #key_file: "/home/kmulvey/keys/sec.gpg"
