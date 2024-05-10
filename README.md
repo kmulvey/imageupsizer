@@ -1,6 +1,6 @@
 # Google Image Upsizer 
 
-[![imageupsizer](https://github.com/kmulvey/imageupsizer/actions/workflows/release_build.yml/badge.svg)](https://github.com/kmulvey/imageupsizer/actions/workflows/release_build.yml) [![codecov](https://codecov.io/gh/kmulvey/imageupsizer/branch/main/graph/badge.svg?token=S1d7uQiIM3)](https://codecov.io/gh/kmulvey/imageupsizer) [![Go Report Card](https://goreportcard.com/badge/github.com/kmulvey/imageupsizer)](https://goreportcard.com/report/github.com/kmulvey/imageupsizer) [![Go Reference](https://pkg.go.dev/badge/github.com/kmulvey/imageupsizer.svg)](https://pkg.go.dev/github.com/kmulvey/imageupsizer)
+[![Build](https://github.com/kmulvey/imageupsizer/actions/workflows/build.yml/badge.svg)](https://github.com/kmulvey/imageupsizer/actions/workflows/build.yml) [![Release](https://github.com/kmulvey/imageupsizer/actions/workflows/release.yml/badge.svg)](https://github.com/kmulvey/imageupsizer/actions/workflows/release.yml) [![codecov](https://codecov.io/gh/kmulvey/imageupsizer/branch/main/graph/badge.svg?token=S1d7uQiIM3)](https://codecov.io/gh/kmulvey/imageupsizer) [![Go Report Card](https://goreportcard.com/badge/github.com/kmulvey/imageupsizer)](https://goreportcard.com/report/github.com/kmulvey/imageupsizer) [![Go Reference](https://pkg.go.dev/badge/github.com/kmulvey/imageupsizer.svg)](https://pkg.go.dev/github.com/kmulvey/imageupsizer)
 
 Extract the best images from Google Image Search. Divergent fork of [yms2772/google_image_upsizer](https://github.com/yms2772/google_image_upsizer).
 
