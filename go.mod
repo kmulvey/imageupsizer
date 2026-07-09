@@ -1,6 +1,7 @@
 module github.com/kmulvey/imageupsizer
 
-go 1.22.2
+go 1.25.0
+
 require (
 	github.com/chromedp/cdproto v0.0.0-20240501202034-ef67d660e9fd
 	github.com/chromedp/chromedp v0.9.5
@@ -48,10 +49,10 @@ require (
 	github.com/spf13/cast v1.6.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/twmb/murmur3 v1.1.8 // indirect
-	golang.org/x/crypto v0.23.0 // indirect
+	golang.org/x/crypto v0.52.0 // indirect
 	golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842 // indirect
 	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
