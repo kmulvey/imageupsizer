@@ -1,6 +1,7 @@
 module github.com/kmulvey/imageupsizer
 
-go 1.22.2
+go 1.25.0
+
 require (
 	github.com/chromedp/cdproto v0.0.0-20240501202034-ef67d660e9fd
 	github.com/chromedp/chromedp v0.9.5
@@ -9,7 +10,7 @@ require (
 	github.com/kmulvey/path v1.22.0
 	github.com/sirupsen/logrus v1.9.3
 	go.szostok.io/version v1.2.0
-	golang.org/x/image v0.16.0
+	golang.org/x/image v0.44.0
 )
 
 replace github.com/imdario/mergo => github.com/imdario/mergo v0.3.16
